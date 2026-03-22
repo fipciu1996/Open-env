@@ -6,7 +6,9 @@ The format is managed with [`changelog-cli`](https://pypi.org/project/changelog-
 and follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) together
 with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## Unreleased
+---
 
 ### New
 
@@ -16,14 +18,19 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Breaks
 
+
+## 1.0.2 - (2026-03-22)
+
+### Changes
+* Added a repository-managed pre-push hook that blocks pushing release tags when the package version does not match the tag.
+* The PyPI publish workflow now accepts both numeric tags like 1.0.2 and v-prefixed tags like v1.0.2.
+
+
 ## 1.0.1 - (2026-03-22)
 
 ### Changes
 
-* Updated the package version to `1.0.1` so release metadata matches the current
-  stable release line and the release tag verification step.
-* Aligned the GitHub Actions PyPI publish workflow with numeric release tags
-  such as `1.0.1`, while still accepting an optional `v` prefix.
+* Patch release.
 
 ## 0.1.0 - (2026-03-22)
 
