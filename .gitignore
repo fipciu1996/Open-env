@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+site/
+dist/
+build/
+*.egg-info/
+.venv/
+.env
+*.env
+.env.*
+tests/_tmp/
+.openenv-scan/
+.openenv-scan*/
+openenv-scan-tmp-*/
+# Managed bot directories and generated per-bot artifacts
+/bots/

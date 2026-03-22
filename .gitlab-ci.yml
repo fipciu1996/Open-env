@@ -1,0 +1,56 @@
+stages:
+  - verify
+  - deploy
+
+default:
+  image: python:3.12-slim
+  cache:
+    key: "$CI_JOB_IMAGE"
+    paths:
+      - .cache/pip
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  before_script:
+    - python -m pip install --upgrade pip
+    - python -m pip install -e .[docs]
+
+docs:verify:
+  stage: verify
+  script:
+    - python -m mkdocs build --strict -d public
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_BRANCH'
+
+docs:pages:
+  stage: deploy
+  needs:
+    - job: docs:verify
+      artifacts: true
+  script:
+    - test -f public/index.html
+    - echo "Publishing docs to ${CI_PAGES_URL}"
+  pages:
+    publish: public
+    path_prefix: "$PAGES_PREFIX"
+    expire_in: "$PAGES_EXPIRE_IN"
+  environment:
+    name: "docs/$CI_COMMIT_REF_SLUG"
+    url: "$CI_PAGES_URL"
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      variables:
+        PAGES_PREFIX: 'tag-$CI_COMMIT_REF_SLUG'
+        PAGES_EXPIRE_IN: 'never'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      variables:
+        PAGES_PREFIX: ''
+        PAGES_EXPIRE_IN: 'never'
+    - if: '$CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE == "push"'
+      variables:
+        PAGES_PREFIX: 'branch-$CI_COMMIT_REF_SLUG'
+        PAGES_EXPIRE_IN: '30 days'

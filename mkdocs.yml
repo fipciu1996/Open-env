@@ -1,0 +1,35 @@
+site_name: Open-env
+site_description: Declarative OpenClaw environments, manifests, Docker generation, and bot operations.
+repo_url: https://github.com/fipciu1996/Open-env
+repo_name: fipciu1996/Open-env
+theme:
+  name: readthedocs
+nav:
+  - Overview: index.md
+  - Getting Started: getting-started.md
+  - Concepts: concepts.md
+  - openenv.toml Structure: openenv-toml.md
+  - Changelog: changelog.md
+  - API:
+      - Overview: api/index.md
+      - CLI: api/cli.md
+      - Manifests: api/manifests.md
+      - Docker: api/docker.md
+      - Bots: api/bots.md
+      - Integrations: api/integrations.md
+      - Env Files: api/envfiles.md
+      - Core: api/core.md
+      - Templates: api/templates.md
+plugins:
+  - search
+  - include-markdown
+  - mkdocstrings:
+      handlers:
+        python:
+          paths:
+            - src
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
