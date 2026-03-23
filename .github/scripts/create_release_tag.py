@@ -13,6 +13,7 @@ from verify_release_tag import normalize_tag
 
 
 PROJECT_VERSION_RE = re.compile(r'(?m)^(version\s*=\s*")([^"]+)(")$')
+SAFE_DIRECTORY = Path.cwd().resolve().as_posix()
 
 
 def parse_args() -> argparse.Namespace:
@@ -40,7 +41,7 @@ def parse_args() -> argparse.Namespace:
 def run_git(*args: str, capture_output: bool = False) -> subprocess.CompletedProcess[str]:
     """Run a Git command and return the completed process."""
     return subprocess.run(
-        ["git", *args],
+        ["git", "-c", f"safe.directory={SAFE_DIRECTORY}", *args],
         check=True,
         text=True,
         capture_output=capture_output,

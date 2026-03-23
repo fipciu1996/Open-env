@@ -13,6 +13,7 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### New
 
 ### Changes
+* The release tag helper now configures Git safe.directory automatically, so local release tagging works in protected repositories.
 
 ### Fixes
 
