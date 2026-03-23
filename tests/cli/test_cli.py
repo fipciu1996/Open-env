@@ -139,10 +139,13 @@ class CliTests(unittest.TestCase):
             self.assertTrue(dockerfile_path.exists())
             self.assertTrue(compose_path.exists())
             self.assertTrue(env_path.exists())
+            self.assertTrue((temp_dir / ".openclaw" / "openclaw.json").exists())
+            self.assertTrue((temp_dir / "workspace" / "AGENTS.md").exists())
             compose_text = compose_path.read_text(encoding="utf-8")
             self.assertIn("openclaw-gateway:", compose_text)
             self.assertIn("openclaw-cli:", compose_text)
             self.assertIn('dockerfile: "Dockerfile"', compose_text)
+            self.assertIn('OPENCLAW_CONFIG_PATH: "/opt/openclaw/openclaw.json"', compose_text)
             expected_env = (FIXTURES / "example.bot.env").read_text(encoding="utf-8")
             self.assertEqual(env_path.read_text(encoding="utf-8"), expected_env)
 
@@ -223,6 +226,8 @@ class CliTests(unittest.TestCase):
             self.assertTrue(dockerfile_path.exists())
             self.assertTrue(compose_path.exists())
             self.assertTrue(env_path.exists())
+            self.assertTrue((temp_dir / ".openclaw" / "openclaw.json").exists())
+            self.assertTrue((temp_dir / "workspace" / "AGENTS.md").exists())
             expected = (FIXTURES / "example.compose.yml").read_text(encoding="utf-8")
             self.assertEqual(compose_path.read_text(encoding="utf-8"), expected)
             expected_env = (FIXTURES / "example.bot.env").read_text(encoding="utf-8")
@@ -302,7 +307,7 @@ agent_name = "Sidecar Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """.strip(),
                 encoding="utf-8",
@@ -510,4 +515,5 @@ deny = []
 
         self.assertEqual(exit_code, 9)
         self.assertIn("bad command", stderr.getvalue())
+
 

@@ -72,7 +72,7 @@ state_dir = "/opt/openclaw"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = true
 ```
 
@@ -264,3 +264,4 @@ OpenClaw-env-manager enforces a few important rules when loading the manifest:
 - [Getting Started](getting-started.md)
 - [Concepts](concepts.md)
 - [API: Manifests](api/manifests.md)
+

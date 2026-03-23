@@ -112,7 +112,7 @@ SAMPLE_MANIFEST = dedent(
     mode = "workspace-write"
     scope = "session"
     workspace_access = "full"
-    network = "none"
+    network = "bridge"
     read_only_root = true
 
     [openclaw.tools]

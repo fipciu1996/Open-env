@@ -34,10 +34,15 @@ def assess_manifest_security(manifest: Manifest) -> list[str]:
             "openclaw.sandbox.read_only_root is disabled; writable roots increase the "
             "impact of agent or container compromise."
         )
-    if manifest.openclaw.sandbox.network != "none":
+    if manifest.openclaw.sandbox.network == "host":
         advisories.append(
-            f"openclaw.sandbox.network={manifest.openclaw.sandbox.network!r}; outbound "
-            "network access should be enabled only when the bot really needs it."
+            "openclaw.sandbox.network='host'; this weakens host isolation by sharing "
+            "the host network namespace with the sandbox."
+        )
+    elif manifest.openclaw.sandbox.network not in {"bridge", "none"}:
+        advisories.append(
+            f"openclaw.sandbox.network={manifest.openclaw.sandbox.network!r}; verify "
+            "that the selected network mode preserves the intended host isolation."
         )
     if any(
         tool_name.strip().lower() in _WILDCARD_TOOL_NAMES

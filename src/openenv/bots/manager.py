@@ -33,6 +33,7 @@ from openenv.docker.compose import (
     default_compose_filename,
     default_env_filename,
     gateway_container_name,
+    materialize_runtime_mount_tree,
     render_compose,
     render_all_bots_compose,
     render_env_file,
@@ -685,6 +686,13 @@ def generate_bot_artifacts(root: str | Path, slug: str) -> GeneratedArtifacts:
     write_env_file(
         env_path,
         render_env_file(manifest, image_tag, existing_values=existing_values),
+    )
+    materialize_runtime_mount_tree(
+        bot.manifest_path.parent,
+        manifest,
+        lockfile,
+        raw_manifest_text=raw_manifest_text,
+        raw_lock_text=raw_lock_text,
     )
 
     return GeneratedArtifacts(

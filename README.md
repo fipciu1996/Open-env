@@ -444,7 +444,7 @@ agent_name = "Operations Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = true
 ```
 
@@ -654,7 +654,10 @@ the adjacent generated `Dockerfile`, and both services use the resulting tag
 through `OPENCLAW_IMAGE`. When a canonical sidecar `bots/<bot-slug>/.env` file
 exists, its secret values are merged into the generated compose env file
 together with OpenClaw defaults such as image tag, ports, bind mode, and
-workspace paths.
+workspace paths. The generated `openclaw-cli` service stays alive with an idle
+entrypoint by default, so `docker compose up -d` does not exit immediately into
+the OpenClaw help screen; run interactive commands with
+`docker compose exec openclaw-cli openclaw ...`.
 
 When `clawopenenv scan` is used, the CLI materializes skills to a temporary
 directory and runs `skill-scanner scan-all ... --recursive` against that tree
@@ -665,8 +668,16 @@ For already running bot containers, the interactive menu can also create a
 skill snapshot by inspecting `<workspace>/skills` inside the container and
 merging any newly discovered skills back into the bot manifest.
 When `freeride` is present, the Docker build also runs
-`npx clawhub@latest install freeride` plus `python -m pip install -e` for the
-installed `free-ride` package before the skill scan gate. After container start,
+`npx clawhub@latest install free-ride` before the skill scan gate. For manual
+local installation inside an existing OpenClaw workspace, use:
+
+```bash
+npx clawhub@latest install free-ride
+cd ~/.openclaw/workspace/skills/free-ride
+pip install -e .
+```
+
+After container start,
 set `OPENROUTER_API_KEY` and run `freeride auto` followed by
 `openclaw gateway restart` if you want FreeRide to rewrite the active
 OpenClaw model configuration.
@@ -715,3 +726,4 @@ Generate the HTML report under `htmlcov/`:
 ```bash
 make coverage-html
 ```
+

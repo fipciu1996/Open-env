@@ -7,13 +7,17 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 
-from openenv.core.models import Manifest
+from pathlib import PurePosixPath
+
+from openenv.core.models import Lockfile, Manifest
 from openenv.core.security import assess_runtime_env_security
 from openenv.core.utils import slugify_name
+from openenv.docker.dockerfile import render_runtime_payload
 
 
 OPENCLAW_GATEWAY_SERVICE = "openclaw-gateway"
 OPENCLAW_CLI_SERVICE = "openclaw-cli"
+OPENCLAW_CLI_ENTRYPOINT = ("node", "dist/index.js")
 DEFAULT_OPENCLAW_HOME = "/home/node"
 DEFAULT_OPENCLAW_CONFIG_DIR = "./.openclaw"
 DEFAULT_OPENCLAW_WORKSPACE_DIR = "./workspace"
@@ -30,12 +34,15 @@ DEFAULT_OPENCLAW_NOFILE_HARD = "2048"
 DEFAULT_OPENCLAW_NPROC = "512"
 DEFAULT_BUILD_CONTEXT = "."
 DEFAULT_DOCKERFILE_NAME = "Dockerfile"
+DEFAULT_OPENCLAW_GATEWAY_IMAGE = "ghcr.io/openclaw/openclaw:latest"
 LEGACY_OPENCLAW_IMAGE = "alpine/openclaw:main"
 ALL_BOTS_GATEWAY_SERVICE = "openclaw-gateway"
 ALL_BOTS_GATEWAY_CONTAINER = "all-bots-openclaw-gateway"
 ALL_BOTS_COMPOSE_FILENAME = "all-bots-compose.yml"
 ALL_BOTS_GATEWAY_CONFIG_DIR = "./.all-bots/.openclaw"
 ALL_BOTS_GATEWAY_WORKSPACE_DIR = "./.all-bots/workspace"
+ALL_BOTS_GATEWAY_STATE_DIR = "/opt/openclaw"
+ALL_BOTS_GATEWAY_CONFIG_PATH = f"{ALL_BOTS_GATEWAY_STATE_DIR}/openclaw.json"
 DEFAULT_OPENCLAW_ENV_DEFAULTS: tuple[tuple[str, str], ...] = (
     ("OPENCLAW_GATEWAY_TOKEN", ""),
     ("OPENCLAW_ALLOW_INSECURE_PRIVATE_WS", ""),
@@ -86,11 +93,11 @@ def render_compose(manifest: Manifest, image_tag: str) -> str:
     cli_name = cli_container_name(manifest.openclaw.agent_name)
     image_ref = f"${{OPENCLAW_IMAGE:-{image_tag}}}"
     config_mount = (
-        f"${{OPENCLAW_CONFIG_DIR:-{DEFAULT_OPENCLAW_CONFIG_DIR}}}:{DEFAULT_OPENCLAW_HOME}/.openclaw"
+        f"${{OPENCLAW_CONFIG_DIR:-{DEFAULT_OPENCLAW_CONFIG_DIR}}}:{manifest.openclaw.state_dir}"
     )
     workspace_mount = (
         f"${{OPENCLAW_WORKSPACE_DIR:-{DEFAULT_OPENCLAW_WORKSPACE_DIR}}}:"
-        f"{DEFAULT_OPENCLAW_HOME}/.openclaw/workspace"
+        f"{manifest.openclaw.workspace}"
     )
     gateway_env = _base_service_environment(manifest)
     cli_env = dict(gateway_env)
@@ -103,6 +110,9 @@ def render_compose(manifest: Manifest, image_tag: str) -> str:
         "    build:",
         f"      context: {_quoted(DEFAULT_BUILD_CONTEXT)}",
         f"      dockerfile: {_quoted(DEFAULT_DOCKERFILE_NAME)}",
+        "      args:",
+        '        OPENCLAW_INSTALL_BROWSER: "${OPENCLAW_INSTALL_BROWSER:-}"',
+        '        OPENCLAW_INSTALL_DOCKER_CLI: "${OPENCLAW_INSTALL_DOCKER_CLI:-}"',
         f"    container_name: {_quoted(gateway_name)}",
         "    env_file:",
         f"      - {_quoted(env_file)}",
@@ -201,7 +211,7 @@ def render_compose(manifest: Manifest, image_tag: str) -> str:
             "    stdin_open: true",
             "    tty: true",
             "    init: true",
-            '    entrypoint: ["node", "dist/index.js"]',
+            f"    entrypoint: [{', '.join(_quoted(part) for part in OPENCLAW_CLI_ENTRYPOINT)}]",
             "    depends_on:",
             f"      - {OPENCLAW_GATEWAY_SERVICE}",
         ]
@@ -216,7 +226,7 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
     lines = [
         "services:",
         f"  {ALL_BOTS_GATEWAY_SERVICE}:",
-        f'    image: {_quoted("${OPENCLAW_GATEWAY_IMAGE:-alpine/openclaw:main}")}',
+        f'    image: {_quoted(f"${{OPENCLAW_GATEWAY_IMAGE:-{DEFAULT_OPENCLAW_GATEWAY_IMAGE}}}")}',
         f"    container_name: {_quoted(ALL_BOTS_GATEWAY_CONTAINER)}",
         "    environment:",
     ]
@@ -239,11 +249,11 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
             "    volumes:",
             (
                 f'      - "{ALL_BOTS_GATEWAY_CONFIG_DIR}:'
-                f'{DEFAULT_OPENCLAW_HOME}/.openclaw"'
+                f'{ALL_BOTS_GATEWAY_STATE_DIR}"'
             ),
             (
                 f'      - "{ALL_BOTS_GATEWAY_WORKSPACE_DIR}:'
-                f'{DEFAULT_OPENCLAW_HOME}/.openclaw/workspace"'
+                f'{ALL_BOTS_GATEWAY_STATE_DIR}/workspace"'
             ),
             "    ports:",
             (
@@ -284,9 +294,9 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
         service_name = _all_bots_cli_service_name(spec.slug)
         container_name = _all_bots_cli_container_name(spec.slug)
         env_file = f"./{spec.slug}/{default_env_filename(spec.manifest.openclaw.agent_name)}"
-        config_mount = f"./{spec.slug}/.openclaw:{DEFAULT_OPENCLAW_HOME}/.openclaw"
+        config_mount = f"./{spec.slug}/.openclaw:{spec.manifest.openclaw.state_dir}"
         workspace_mount = (
-            f"./{spec.slug}/workspace:{DEFAULT_OPENCLAW_HOME}/.openclaw/workspace"
+            f"./{spec.slug}/workspace:{spec.manifest.openclaw.workspace}"
         )
         cli_env = dict(_base_service_environment(spec.manifest))
         cli_env["BROWSER"] = "echo"
@@ -298,6 +308,9 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
                 "    build:",
                 f'      context: {_quoted(f"./{spec.slug}")}',
                 f"      dockerfile: {_quoted(DEFAULT_DOCKERFILE_NAME)}",
+                "      args:",
+                '        OPENCLAW_INSTALL_BROWSER: "${OPENCLAW_INSTALL_BROWSER:-}"',
+                '        OPENCLAW_INSTALL_DOCKER_CLI: "${OPENCLAW_INSTALL_DOCKER_CLI:-}"',
                 f"    container_name: {_quoted(container_name)}",
                 '    network_mode: "service:openclaw-gateway"',
                 "    cap_drop:",
@@ -327,7 +340,7 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
                 "    stdin_open: true",
                 "    tty: true",
                 "    init: true",
-                '    entrypoint: ["node", "dist/index.js"]',
+                f"    entrypoint: [{', '.join(_quoted(part) for part in OPENCLAW_CLI_ENTRYPOINT)}]",
                 "    depends_on:",
                 f"      - {ALL_BOTS_GATEWAY_SERVICE}",
             ]
@@ -370,12 +383,16 @@ def render_env_file(
         "OPENCLAW_GATEWAY_PORT": DEFAULT_OPENCLAW_GATEWAY_PORT,
         "OPENCLAW_BRIDGE_PORT": DEFAULT_OPENCLAW_BRIDGE_PORT,
         "OPENCLAW_GATEWAY_BIND": DEFAULT_OPENCLAW_GATEWAY_BIND,
+        "OPENCLAW_STATE_DIR": manifest.openclaw.state_dir,
+        "OPENCLAW_CONFIG_PATH": manifest.openclaw.config_path(),
         "OPENCLAW_TMPFS": DEFAULT_OPENCLAW_TMPFS,
         "OPENCLAW_PIDS_LIMIT": DEFAULT_OPENCLAW_PIDS_LIMIT,
         "OPENCLAW_NOFILE_SOFT": DEFAULT_OPENCLAW_NOFILE_SOFT,
         "OPENCLAW_NOFILE_HARD": DEFAULT_OPENCLAW_NOFILE_HARD,
         "OPENCLAW_NPROC": DEFAULT_OPENCLAW_NPROC,
         "OPENCLAW_TZ": DEFAULT_OPENCLAW_TIMEZONE,
+        "OPENCLAW_INSTALL_BROWSER": "",
+        "OPENCLAW_INSTALL_DOCKER_CLI": "",
     }
     for key, default in runtime_defaults.items():
         if key == "OPENCLAW_IMAGE":
@@ -429,6 +446,8 @@ def _base_service_environment(manifest: Manifest) -> dict[str, str]:
     environment = dict(sorted(manifest.runtime.env.items()))
     environment["HOME"] = DEFAULT_OPENCLAW_HOME
     environment["TERM"] = "xterm-256color"
+    environment["OPENCLAW_CONFIG_PATH"] = manifest.openclaw.config_path()
+    environment["OPENCLAW_STATE_DIR"] = manifest.openclaw.state_dir
     environment["TZ"] = f"${{OPENCLAW_TZ:-{DEFAULT_OPENCLAW_TIMEZONE}}}"
     return environment
 
@@ -438,6 +457,8 @@ def _shared_gateway_environment() -> dict[str, str]:
     environment = {
         "HOME": DEFAULT_OPENCLAW_HOME,
         "TERM": "xterm-256color",
+        "OPENCLAW_CONFIG_PATH": ALL_BOTS_GATEWAY_CONFIG_PATH,
+        "OPENCLAW_STATE_DIR": ALL_BOTS_GATEWAY_STATE_DIR,
         "TZ": f"${{OPENCLAW_TZ:-{DEFAULT_OPENCLAW_TIMEZONE}}}",
     }
     for key, _ in DEFAULT_OPENCLAW_ENV_DEFAULTS:
@@ -463,3 +484,86 @@ def _render_environment(environment: dict[str, str]) -> list[str]:
 def _quoted(value: str) -> str:
     """Return a YAML-safe quoted scalar using JSON string escaping."""
     return json.dumps(value)
+
+
+def materialize_runtime_mount_tree(
+    root: str | Path,
+    manifest: Manifest,
+    lockfile: Lockfile,
+    *,
+    raw_manifest_text: str,
+    raw_lock_text: str,
+) -> None:
+    """Write the host-side runtime files expected by the generated bind mounts."""
+    root_path = Path(root).resolve()
+    state_root = root_path / DEFAULT_OPENCLAW_CONFIG_DIR.removeprefix("./")
+    workspace_root = root_path / DEFAULT_OPENCLAW_WORKSPACE_DIR.removeprefix("./")
+    payload = render_runtime_payload(
+        manifest,
+        lockfile,
+        raw_manifest_text=raw_manifest_text,
+        raw_lock_text=raw_lock_text,
+    )
+    directories = payload["directories"]
+    files = payload["files"]
+    if not isinstance(directories, list) or not isinstance(files, dict):
+        raise TypeError("Runtime payload shape is invalid.")
+    for directory in directories:
+        host_path = _host_mount_path_for_container_path(
+            str(directory),
+            manifest,
+            state_root=state_root,
+            workspace_root=workspace_root,
+        )
+        if host_path is not None:
+            host_path.mkdir(parents=True, exist_ok=True)
+    agent_dir = _host_mount_path_for_container_path(
+        manifest.openclaw.agent_dir(),
+        manifest,
+        state_root=state_root,
+        workspace_root=workspace_root,
+    )
+    if agent_dir is not None:
+        agent_dir.mkdir(parents=True, exist_ok=True)
+    for container_path, content in sorted(files.items()):
+        host_path = _host_mount_path_for_container_path(
+            str(container_path),
+            manifest,
+            state_root=state_root,
+            workspace_root=workspace_root,
+        )
+        if host_path is None or not isinstance(content, str):
+            continue
+        host_path.parent.mkdir(parents=True, exist_ok=True)
+        host_path.write_text(content, encoding="utf-8")
+
+
+def _host_mount_path_for_container_path(
+    container_path: str,
+    manifest: Manifest,
+    *,
+    state_root: Path,
+    workspace_root: Path,
+) -> Path | None:
+    """Map one container path from the runtime payload to the exported host tree."""
+    container = PurePosixPath(container_path)
+    workspace = PurePosixPath(manifest.openclaw.workspace)
+    state_dir = PurePosixPath(manifest.openclaw.state_dir)
+    try:
+        relative = container.relative_to(workspace)
+    except ValueError:
+        pass
+    else:
+        return _join_posix_relative(workspace_root, relative)
+    try:
+        relative = container.relative_to(state_dir)
+    except ValueError:
+        return None
+    return _join_posix_relative(state_root, relative)
+
+
+def _join_posix_relative(root: Path, relative: PurePosixPath) -> Path:
+    """Join a POSIX-style relative path onto a host path."""
+    if not relative.parts:
+        return root
+    return root.joinpath(*relative.parts)

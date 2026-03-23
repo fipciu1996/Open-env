@@ -5,7 +5,7 @@
     "resolved_reference": "python:3.12-slim@sha256:1111111111111111111111111111111111111111111111111111111111111111"
   },
   "lock_version": 1,
-  "manifest_hash": "0f001558bbf99ce5f5e52d1d00df81a929556026896e69f7b11922d91425924a",
+  "manifest_hash": "b1bdb4d9ebf90956f6e8ed5a5c2c603586db2bb090ccfd6a58153a77c2e46b0f",
   "node_packages": [
     {
       "kind": "pinned",
@@ -54,7 +54,7 @@
       "agent_name": "Operations Agent",
       "sandbox": {
         "mode": "workspace-write",
-        "network": "none",
+        "network": "bridge",
         "read_only_root": true,
         "scope": "session",
         "workspace_access": "full"
@@ -72,7 +72,7 @@
       "runtime": "openclaw",
       "version": "1.2.3"
     },
-    "raw_manifest_sha256": "a53e087d06e17def4dbe6d879f027f29f2b1f11929074a992cea1e394963304a",
+    "raw_manifest_sha256": "15cee1c0fb4164ce283918b078ff879ef36555362775229901796d043b3290aa",
     "runtime": {
       "base_image": "python:3.12-slim@sha256:1111111111111111111111111111111111111111111111111111111111111111",
       "env": {

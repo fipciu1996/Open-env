@@ -20,6 +20,8 @@ harder to miss.
 OpenClaw-env-manager currently applies or generates these default protections:
 
 - `read_only_root = true` in generated OpenClaw sandbox configuration
+- `network = "bridge"` in generated OpenClaw sandbox configuration so agents keep
+  outbound network access without sharing the host network namespace
 - localhost-only binds for generated gateway and bridge ports
 - `cap_drop: [ALL]` for generated Compose services
 - `security_opt: ["no-new-privileges:true"]`
@@ -68,7 +70,8 @@ default posture. Current advisory examples include:
 - `runtime.base_image` not pinned with `@sha256`
 - `runtime.user = "root"`
 - `openclaw.sandbox.read_only_root = false`
-- sandbox network access broader than `none`
+- sandbox network modes such as `host` or custom values that weaken host
+  isolation beyond the default `bridge`
 - wildcard tool policies such as `*` or `all`
 - explicit `shell_command` allowlists
 - public host binds such as `OPENCLAW_GATEWAY_HOST_BIND=0.0.0.0`

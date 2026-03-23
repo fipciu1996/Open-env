@@ -53,6 +53,8 @@ class DockerfileTests(unittest.TestCase):
             'LABEL io.openclawenv.sandbox-image="python:3.12-slim@sha256:',
             dockerfile,
         )
+        self.assertIn('ARG OPENCLAW_INSTALL_BROWSER=""', dockerfile)
+        self.assertIn('ARG OPENCLAW_INSTALL_DOCKER_CLI=""', dockerfile)
         self.assertIn("USER root", dockerfile)
         self.assertTrue(dockerfile.rstrip().endswith("USER node"))
         self.assertNotIn("WORKDIR /workspace", dockerfile)
@@ -110,6 +112,8 @@ class DockerfileTests(unittest.TestCase):
             dockerfile,
         )
         self.assertIn("RUN agent-browser install", dockerfile)
+        self.assertIn("OPENCLAW_INSTALL_BROWSER requires an apt-get based image", dockerfile)
+        self.assertIn("OPENCLAW_INSTALL_DOCKER_CLI requires an apt-get based image", dockerfile)
 
     def test_dockerfile_runs_skill_scan_during_build(self) -> None:
         manifest, raw_manifest_text = load_manifest(FIXTURES / "example.openclawenv.toml")
@@ -155,13 +159,10 @@ class DockerfileTests(unittest.TestCase):
         self.assertIn('ln -sfn "/opt/openclaw" "/home/agent/.openclaw"', dockerfile)
         self.assertIn(
             f'RUN rm -rf "/opt/openclaw/workspace/skills/{FREERIDE_SKILL_NAME}" '
-            f"&& npx clawhub@latest install {FREERIDE_SKILL_SOURCE}",
+            f"&& npx clawhub@latest install {FREERIDE_SKILL_NAME}",
             dockerfile,
         )
-        self.assertIn(
-            f'RUN python -m pip install --no-cache-dir -e "/opt/openclaw/workspace/skills/{FREERIDE_SKILL_NAME}"',
-            dockerfile,
-        )
+        self.assertNotIn("pip install --no-cache-dir -e", dockerfile)
 
     def test_dockerfile_skips_build_time_skill_scan_without_skills(self) -> None:
         manifest, raw_manifest_text = load_manifest(FIXTURES / "example.openclawenv.toml")

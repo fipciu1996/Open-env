@@ -13,6 +13,7 @@ from openenv.docker.compose import (
     DEFAULT_OPENCLAW_NPROC,
     DEFAULT_OPENCLAW_PIDS_LIMIT,
     DEFAULT_OPENCLAW_TMPFS,
+    OPENCLAW_CLI_ENTRYPOINT,
     all_bots_compose_filename,
     cli_container_name,
     default_compose_filename,
@@ -49,8 +50,20 @@ class ComposeTests(unittest.TestCase):
         self.assertIn("    build:", compose_text)
         self.assertIn('      context: "."', compose_text)
         self.assertIn('      dockerfile: "Dockerfile"', compose_text)
+        self.assertIn('        OPENCLAW_INSTALL_BROWSER: "${OPENCLAW_INSTALL_BROWSER:-}"', compose_text)
+        self.assertIn(
+            '        OPENCLAW_INSTALL_DOCKER_CLI: "${OPENCLAW_INSTALL_DOCKER_CLI:-}"',
+            compose_text,
+        )
         self.assertIn("    cap_drop:", compose_text)
         self.assertIn("      - ALL", compose_text)
+        expected_entrypoint = (
+            '    entrypoint: [' + ", ".join(f'"{part}"' for part in OPENCLAW_CLI_ENTRYPOINT) + "]"
+        )
+        self.assertIn(
+            expected_entrypoint,
+            compose_text,
+        )
         self.assertIn("    security_opt:", compose_text)
         self.assertIn("      - no-new-privileges:true", compose_text)
         self.assertIn("    read_only: true", compose_text)
@@ -79,6 +92,8 @@ class ComposeTests(unittest.TestCase):
             f'${{OPENCLAW_BRIDGE_HOST_BIND:-{DEFAULT_OPENCLAW_BRIDGE_HOST_BIND}}}',
             compose_text,
         )
+        self.assertIn('OPENCLAW_STATE_DIR: "/opt/openclaw"', compose_text)
+        self.assertIn('OPENCLAW_CONFIG_PATH: "/opt/openclaw/openclaw.json"', compose_text)
 
     def test_default_compose_filename_uses_bot_name(self) -> None:
         self.assertEqual(
@@ -170,6 +185,11 @@ class ComposeTests(unittest.TestCase):
         self.assertIn('      context: "./analytics-agent"', compose_text)
         self.assertIn('      - "./operations-agent/.operations-agent.env"', compose_text)
         self.assertIn('      - "./analytics-agent/.analytics-agent.env"', compose_text)
+        self.assertIn('    image: "${OPENCLAW_GATEWAY_IMAGE:-ghcr.io/openclaw/openclaw:latest}"', compose_text)
+        self.assertIn('      OPENCLAW_STATE_DIR: "/opt/openclaw"', compose_text)
+        self.assertIn('      OPENCLAW_CONFIG_PATH: "/opt/openclaw/openclaw.json"', compose_text)
+        self.assertIn('      - "./.all-bots/.openclaw:/opt/openclaw"', compose_text)
+        self.assertIn('      - "./.all-bots/workspace:/opt/openclaw/workspace"', compose_text)
         self.assertIn('      - ALL', compose_text)
         self.assertIn('    read_only: true', compose_text)
 

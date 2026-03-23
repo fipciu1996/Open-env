@@ -215,7 +215,7 @@ class SandboxConfig:
     mode: str = "workspace-write"
     scope: str = "session"
     workspace_access: str = "full"
-    network: str = "none"
+    network: str = "bridge"
     read_only_root: bool = True
 
     def to_dict(self) -> dict[str, Any]:

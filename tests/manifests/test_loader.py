@@ -84,7 +84,7 @@ agent_name = "Bad Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         with self.assertRaises(ValidationError):
@@ -117,7 +117,7 @@ agent_name = "Base Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         manifest = parse_manifest(tomllib.loads(raw))
@@ -157,7 +157,7 @@ agent_name = "Env Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """.strip(),
             encoding="utf-8",
@@ -206,7 +206,7 @@ agent_name = "Ref Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """.strip(),
             encoding="utf-8",
@@ -269,7 +269,7 @@ agent_name = "Env Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """.strip(),
             encoding="utf-8",
@@ -313,7 +313,7 @@ agent_name = "Bad Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         with self.assertRaises(ValidationError):
@@ -346,7 +346,7 @@ agent_name = "Bad Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         with self.assertRaises(ValidationError):
@@ -379,7 +379,7 @@ agent_name = "Bad Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         with self.assertRaises(ValidationError) as ctx:
@@ -414,7 +414,7 @@ agent_name = "Wild Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = true
 
 [openclaw.tools]
@@ -461,7 +461,7 @@ agent_name = "Bad Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         with self.assertRaises(ValidationError) as ctx:
@@ -497,7 +497,7 @@ agent_name = "Bad Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         with self.assertRaises(ValidationError) as ctx:
@@ -533,7 +533,7 @@ workspace = "workspace"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         with self.assertRaises(ValidationError) as ctx:
@@ -578,7 +578,7 @@ agent_name = "Dup Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         with self.assertRaises(ValidationError) as ctx:
@@ -614,7 +614,7 @@ agent_name = "Memory Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         manifest = parse_manifest(tomllib.loads(raw))
@@ -648,7 +648,7 @@ agent_name = "Missing Ref"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         with self.assertRaises(ValidationError) as ctx:
@@ -683,7 +683,7 @@ agent_name = "Empty Ref"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         (self.work_dir / "AGENTS.md").write_text("\n", encoding="utf-8")
@@ -725,7 +725,7 @@ agent_name = "Bad Secret Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         with self.assertRaises(ValidationError) as ctx:
@@ -761,7 +761,7 @@ agent_name = "Bad Env Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """
         with self.assertRaises(ValidationError) as ctx:
@@ -938,8 +938,9 @@ agent_name = "Base Agent"
 mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
-network = "none"
+network = "bridge"
 read_only_root = false
 """.strip()
         )
+
 

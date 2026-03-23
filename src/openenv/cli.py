@@ -16,6 +16,7 @@ from openenv.docker.builder import build_image_with_args, default_image_tag
 from openenv.docker.compose import (
     default_compose_filename,
     default_env_filename,
+    materialize_runtime_mount_tree,
     render_compose,
     render_env_file,
     write_compose,
@@ -230,11 +231,17 @@ def _handle_export_dockerfile(args: argparse.Namespace) -> int:
 def _handle_build(args: argparse.Namespace) -> int:
     """Build the Docker image and emit the compose bundle beside the manifest."""
     manifest_path = _resolve_manifest_path_argument(args.path)
-    manifest, _ = load_manifest(manifest_path)
+    manifest, lockfile, raw_manifest_text = _load_and_verify_lockfile(
+        manifest_path,
+        _resolve_lock_path_argument(args.lock, manifest_path=manifest_path),
+    )
     _log_manifest_security_advisories(manifest)
-    dockerfile_text = _render_locked_dockerfile(
-        manifest_path=manifest_path,
-        lock_path=_resolve_lock_path_argument(args.lock, manifest_path=manifest_path),
+    raw_lock_text = dump_lockfile(lockfile)
+    dockerfile_text = render_dockerfile(
+        manifest,
+        lockfile,
+        raw_manifest_text=raw_manifest_text,
+        raw_lock_text=raw_lock_text,
     )
     tag = args.tag or default_image_tag(manifest.project.name, manifest.project.version)
     build_image_with_args(
@@ -249,7 +256,10 @@ def _handle_build(args: argparse.Namespace) -> int:
     dockerfile_path, compose_path, env_path = _write_compose_bundle(
         manifest_path=manifest_path,
         manifest=manifest,
+        lockfile=lockfile,
         image_tag=tag,
+        raw_manifest_text=raw_manifest_text,
+        raw_lock_text=raw_lock_text,
         dockerfile_text=dockerfile_text,
     )
     logger.info("Wrote Dockerfile to {}", dockerfile_path)
@@ -265,18 +275,24 @@ def _handle_export_compose(args: argparse.Namespace) -> int:
     lock_path = _resolve_lock_path_argument(args.lock, manifest_path=manifest_path)
     manifest, _ = load_manifest(manifest_path)
     _log_manifest_security_advisories(manifest)
-    _load_and_verify_lockfile(manifest_path, lock_path)
+    manifest, lockfile, raw_manifest_text = _load_and_verify_lockfile(manifest_path, lock_path)
     tag = args.tag or default_image_tag(manifest.project.name, manifest.project.version)
     compose_path = Path(args.output) if args.output else None
-    dockerfile_text = _render_locked_dockerfile(
-        manifest_path=manifest_path,
-        lock_path=lock_path,
+    raw_lock_text = dump_lockfile(lockfile)
+    dockerfile_text = render_dockerfile(
+        manifest,
+        lockfile,
+        raw_manifest_text=raw_manifest_text,
+        raw_lock_text=raw_lock_text,
     )
     dockerfile_path, compose_path, env_path = _write_compose_bundle(
         manifest_path=manifest_path,
         manifest=manifest,
+        lockfile=lockfile,
         image_tag=tag,
         compose_path=compose_path,
+        raw_manifest_text=raw_manifest_text,
+        raw_lock_text=raw_lock_text,
         dockerfile_text=dockerfile_text,
     )
     logger.info("Wrote Dockerfile to {}", dockerfile_path)
@@ -381,7 +397,10 @@ def _write_compose_bundle(
     *,
     manifest_path: str,
     manifest: Manifest,
+    lockfile: Lockfile,
     image_tag: str,
+    raw_manifest_text: str,
+    raw_lock_text: str,
     compose_path: Path | None = None,
     dockerfile_text: str | None = None,
 ) -> tuple[Path | None, Path, Path]:
@@ -406,6 +425,13 @@ def _write_compose_bundle(
     write_env_file(
         env_target,
         render_env_file(manifest, image_tag, existing_values=existing_values),
+    )
+    materialize_runtime_mount_tree(
+        compose_target.resolve().parent,
+        manifest,
+        lockfile,
+        raw_manifest_text=raw_manifest_text,
+        raw_lock_text=raw_lock_text,
     )
     return dockerfile_target, compose_target, env_target
 

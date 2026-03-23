@@ -59,6 +59,44 @@ class SecurityAssessmentTests(unittest.TestCase):
         self.assertTrue(any("wildcard entries" in advisory for advisory in advisories))
         self.assertTrue(any("includes shell_command" in advisory for advisory in advisories))
 
+    def test_assess_manifest_security_allows_bridge_network_without_network_warning(self) -> None:
+        manifest = Manifest(
+            schema_version=1,
+            project=ProjectConfig(
+                name="Bridge Bot",
+                version="1.0.0",
+                description="Bridge network with host isolation preserved.",
+                runtime="openclaw",
+            ),
+            runtime=RuntimeConfig(
+                base_image="python:3.12-slim@sha256:" + "1" * 64,
+                python_version="3.12",
+                user="agent",
+            ),
+            agent=AgentConfig(
+                agents_md="Agents",
+                soul_md="Soul",
+                user_md="User",
+            ),
+            skills=[],
+            openclaw=OpenClawConfig(
+                agent_id="bridge-bot",
+                agent_name="Bridge Bot",
+                tools_allow=[],
+                sandbox=SandboxConfig(
+                    mode="workspace-write",
+                    scope="session",
+                    workspace_access="full",
+                    network="bridge",
+                    read_only_root=True,
+                ),
+            ),
+        )
+
+        advisories = assess_manifest_security(manifest)
+
+        self.assertFalse(any("sandbox.network" in advisory for advisory in advisories))
+
     def test_assess_runtime_env_security_reports_public_bind_and_insecure_ws(self) -> None:
         advisories = assess_runtime_env_security(
             {

@@ -257,6 +257,8 @@ class BotManagerTests(unittest.TestCase):
             "OPENAI_API_KEY=",
             artifacts.env_path.read_text(encoding="utf-8"),
         )
+        self.assertTrue((artifacts.bot.manifest_path.parent / ".openclaw" / "openclaw.json").exists())
+        self.assertTrue((artifacts.bot.manifest_path.parent / "workspace" / "AGENTS.md").exists())
 
     def test_generate_all_bots_stack_writes_shared_compose(self) -> None:
         create_bot(
@@ -305,6 +307,10 @@ class BotManagerTests(unittest.TestCase):
         self.assertIn("bot-docs-bot:", stack_text)
         self.assertIn('context: "./bundle-bot"', stack_text)
         self.assertIn('context: "./docs-bot"', stack_text)
+        self.assertIn('OPENCLAW_CONFIG_PATH: "/opt/openclaw/openclaw.json"', stack_text)
+        self.assertIn('OPENCLAW_STATE_DIR: "/opt/openclaw"', stack_text)
+        self.assertIn('"./.all-bots/.openclaw:/opt/openclaw"', stack_text)
+        self.assertIn('"./.all-bots/workspace:/opt/openclaw/workspace"', stack_text)
 
     def test_interactive_menu_adds_edits_and_deletes_bot(self) -> None:
         answers = iter(

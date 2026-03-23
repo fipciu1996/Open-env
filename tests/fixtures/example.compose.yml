@@ -4,6 +4,9 @@ services:
     build:
       context: "."
       dockerfile: "Dockerfile"
+      args:
+        OPENCLAW_INSTALL_BROWSER: "${OPENCLAW_INSTALL_BROWSER:-}"
+        OPENCLAW_INSTALL_DOCKER_CLI: "${OPENCLAW_INSTALL_DOCKER_CLI:-}"
     container_name: "operations-agent-openclaw-gateway"
     env_file:
       - ".operations-agent.env"
@@ -12,6 +15,8 @@ services:
       PYTHONUNBUFFERED: "1"
       HOME: "/home/node"
       TERM: "xterm-256color"
+      OPENCLAW_CONFIG_PATH: "/opt/openclaw/openclaw.json"
+      OPENCLAW_STATE_DIR: "/opt/openclaw"
       TZ: "${OPENCLAW_TZ:-UTC}"
     cap_drop:
       - ALL
@@ -27,8 +32,8 @@ services:
         hard: "${OPENCLAW_NOFILE_HARD:-2048}"
       nproc: "${OPENCLAW_NPROC:-512}"
     volumes:
-      - "${OPENCLAW_CONFIG_DIR:-./.openclaw}:/home/node/.openclaw"
-      - "${OPENCLAW_WORKSPACE_DIR:-./workspace}:/home/node/.openclaw/workspace"
+      - "${OPENCLAW_CONFIG_DIR:-./.openclaw}:/opt/openclaw"
+      - "${OPENCLAW_WORKSPACE_DIR:-./workspace}:/opt/openclaw/workspace"
       ## Uncomment the lines below to enable sandbox isolation
       ## (agents.defaults.sandbox). Requires Docker CLI in the image
       ## (build with --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1) or use
@@ -90,11 +95,13 @@ services:
       PYTHONUNBUFFERED: "1"
       HOME: "/home/node"
       TERM: "xterm-256color"
+      OPENCLAW_CONFIG_PATH: "/opt/openclaw/openclaw.json"
+      OPENCLAW_STATE_DIR: "/opt/openclaw"
       TZ: "${OPENCLAW_TZ:-UTC}"
       BROWSER: "echo"
     volumes:
-      - "${OPENCLAW_CONFIG_DIR:-./.openclaw}:/home/node/.openclaw"
-      - "${OPENCLAW_WORKSPACE_DIR:-./workspace}:/home/node/.openclaw/workspace"
+      - "${OPENCLAW_CONFIG_DIR:-./.openclaw}:/opt/openclaw"
+      - "${OPENCLAW_WORKSPACE_DIR:-./workspace}:/opt/openclaw/workspace"
     stdin_open: true
     tty: true
     init: true

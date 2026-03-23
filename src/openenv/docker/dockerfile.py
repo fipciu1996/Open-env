@@ -11,7 +11,7 @@ from openenv.core.utils import encode_payload, stable_json_dumps
 
 
 SKILL_SCANNER_REQUIREMENT = "cisco-ai-skill-scanner==2.0.4"
-OPENCLAW_GATEWAY_RUNTIME_IMAGE = "alpine/openclaw:main"
+OPENCLAW_GATEWAY_RUNTIME_IMAGE = "ghcr.io/openclaw/openclaw:latest"
 DEFAULT_NODE_PACKAGES = ("nodejs", "npm")
 DEFAULT_PYTHON_PACKAGES_APT = ("python3", "python3-pip", "python3-venv", "bash")
 DEFAULT_PYTHON_PACKAGES_APK = ("python3", "py3-pip", "py3-virtualenv", "bash")
@@ -22,6 +22,7 @@ DEFAULT_SKILL_SCAN_FAIL_ON_SEVERITY = "high"
 DEFAULT_OPENCLAW_RUNTIME_USER = "node"
 DEFAULT_OPENCLAW_RUNTIME_HOME = "/home/node"
 DEFAULT_PYTHON_VENV_PATH = "/opt/openclawenv/.venv"
+DEFAULT_OPENCLAW_DOCKER_GPG_FINGERPRINT = "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
 
 
 def render_dockerfile(
@@ -74,6 +75,8 @@ def render_dockerfile(
             + " ".join(node_requirements)
         )
         lines.append("RUN agent-browser install")
+    lines.extend(_optional_browser_install_lines())
+    lines.extend(_optional_docker_cli_install_lines())
     lines.extend(_state_link_lines(manifest))
     lines.append("RUN mkdir -p /opt/openclawenv")
     lines.append(
@@ -86,6 +89,23 @@ def render_dockerfile(
     lines.extend(_runtime_permission_lines(manifest))
     lines.append(f"USER {DEFAULT_OPENCLAW_RUNTIME_USER}")
     return "\n".join(lines) + "\n"
+
+
+def render_runtime_payload(
+    manifest: Manifest,
+    lockfile: Lockfile,
+    *,
+    raw_manifest_text: str,
+    raw_lock_text: str,
+) -> dict[str, object]:
+    """Return the file payload embedded into the runtime image."""
+    sandbox_reference = lockfile.base_image["resolved_reference"]
+    return _render_payload(
+        manifest,
+        raw_manifest_text=raw_manifest_text,
+        raw_lock_text=raw_lock_text,
+        base_reference=sandbox_reference,
+    )
 
 
 def _render_payload(
@@ -180,6 +200,55 @@ def _python_venv_lines() -> list[str]:
     ]
 
 
+def _optional_browser_install_lines() -> list[str]:
+    """Render opt-in Playwright browser installation steps for the wrapper image."""
+    return [
+        'ARG OPENCLAW_INSTALL_BROWSER=""',
+        "RUN if [ -n \"$OPENCLAW_INSTALL_BROWSER\" ]; then "
+        "if ! command -v apt-get >/dev/null 2>&1; then "
+        "echo 'OPENCLAW_INSTALL_BROWSER requires an apt-get based image.' >&2; exit 1; "
+        "fi && "
+        "apt-get update && "
+        "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends xvfb && "
+        "mkdir -p /home/node/.cache/ms-playwright && "
+        "PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright "
+        "node /app/node_modules/playwright-core/cli.js install --with-deps chromium && "
+        "chown -R node:node /home/node/.cache/ms-playwright; "
+        "fi",
+    ]
+
+
+def _optional_docker_cli_install_lines() -> list[str]:
+    """Render opt-in Docker CLI installation steps for sandbox-enabled deployments."""
+    return [
+        'ARG OPENCLAW_INSTALL_DOCKER_CLI=""',
+        f'ARG OPENCLAW_DOCKER_GPG_FINGERPRINT="{DEFAULT_OPENCLAW_DOCKER_GPG_FINGERPRINT}"',
+        "RUN if [ -n \"$OPENCLAW_INSTALL_DOCKER_CLI\" ]; then "
+        "if ! command -v apt-get >/dev/null 2>&1; then "
+        "echo 'OPENCLAW_INSTALL_DOCKER_CLI requires an apt-get based image.' >&2; exit 1; "
+        "fi && "
+        "apt-get update && "
+        "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "
+        "ca-certificates curl gnupg && "
+        "install -m 0755 -d /etc/apt/keyrings && "
+        "curl -fsSL https://download.docker.com/linux/debian/gpg -o /tmp/docker.gpg.asc && "
+        "expected_fingerprint=\"$(printf '%s' \"$OPENCLAW_DOCKER_GPG_FINGERPRINT\" | tr '[:lower:]' '[:upper:]' | tr -d '[:space:]')\" && "
+        "actual_fingerprint=\"$(gpg --batch --show-keys --with-colons /tmp/docker.gpg.asc | awk -F: '$1 == \\\"fpr\\\" { print toupper($10); exit }')\" && "
+        "if [ -z \"$actual_fingerprint\" ] || [ \"$actual_fingerprint\" != \"$expected_fingerprint\" ]; then "
+        "echo \"ERROR: Docker apt key fingerprint mismatch (expected $expected_fingerprint, got ${actual_fingerprint:-<empty>})\" >&2; exit 1; "
+        "fi && "
+        "gpg --dearmor -o /etc/apt/keyrings/docker.gpg /tmp/docker.gpg.asc && "
+        "rm -f /tmp/docker.gpg.asc && "
+        "chmod a+r /etc/apt/keyrings/docker.gpg && "
+        "printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian bookworm stable\\n' "
+        "\"$(dpkg --print-architecture)\" > /etc/apt/sources.list.d/docker.list && "
+        "apt-get update && "
+        "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "
+        "docker-ce-cli docker-compose-plugin; "
+        "fi",
+    ]
+
+
 def _global_node_requirements(lockfile: Lockfile) -> list[str]:
     """Return the default and user-requested global Node tools for the image."""
     ordered = list(DEFAULT_GLOBAL_NODE_TOOLS)
@@ -254,8 +323,7 @@ def _freeride_install_lines(manifest: Manifest) -> list[str]:
         return []
     skill_path = PurePosixPath(manifest.openclaw.workspace) / "skills" / FREERIDE_SKILL_NAME
     return [
-        f'RUN rm -rf "{skill_path}" && npx clawhub@latest install {FREERIDE_SKILL_SOURCE}',
-        f'RUN python -m pip install --no-cache-dir -e "{skill_path}"',
+        f'RUN rm -rf "{skill_path}" && npx clawhub@latest install {FREERIDE_SKILL_NAME}',
     ]
 
 
