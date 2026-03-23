@@ -30,6 +30,7 @@ It is inspired by Poetry's manifest-plus-lock workflow:
   - [Linux](#linux)
   - [Notes](#notes)
 - [V1 Scope](#v1-scope)
+- [Security Notes](#security-notes)
 - [Manifest Shape](#manifest-shape)
 - [CLI](#cli)
 - [Makefile](#makefile)
@@ -146,9 +147,12 @@ Before the first release, configure a PyPI Trusted Publisher for:
 
 ## Documentation
 
-Project documentation is generated with `MkDocs + mkdocstrings`. The `docs/`
+Project documentation is generated with `MkDocs + mkdocstrings` and uses the
+`mkdocs-shadcn` theme. The `docs/`
 directory holds narrative pages, while the API reference is generated directly
-from the internal Python package implementation.
+from the internal Python package implementation. The MkDocs config also uses a
+small local hook so the `shadcn` theme does not require global Git
+`safe.directory` changes just to build docs.
 
 The docs also include a dedicated reference page for the generated
 `openclawenv.toml` structure, including the top-level sections, field meanings, and
@@ -333,6 +337,54 @@ managed bots, and generated images:
 - `freeride` (`free-ride` inside the workspace)
 - `agent-browser-clawdbot`
 
+## Security Notes
+
+OpenClaw-env-manager follows a secure-by-default model, but it does not silently
+override explicit operator intent. Secure defaults are applied to newly
+generated manifests and artifacts, while consciously weaker settings remain
+available and are surfaced as non-blocking security advisories.
+
+Existing default mechanisms include:
+
+- `read_only_root = true` for newly generated OpenClaw sandbox configuration
+- localhost-only binds for generated gateway and bridge ports
+- `cap_drop: [ALL]`, `no-new-privileges:true`, read-only root filesystems,
+  `tmpfs`, `pids_limit`, and `ulimits` in generated Compose services
+- sidecar `.env` files for secrets so sensitive values are not baked into images
+- build-time and preflight skill scanning with `cisco-ai-skill-scanner`
+- mandatory baseline skills that keep operational and security guardrails present
+- warnings when the operator chooses riskier settings such as wildcard tool
+  policies, `shell_command` allowlists, unpinned base images, public host binds,
+  or writable root filesystems
+
+The default image/runtime baseline also includes a fixed starter set of skills
+and tools:
+
+- mandatory skills: `deus-context-engine`, `self-improving-agent`,
+  `skill-security-review`, `freeride`, and `agent-browser-clawdbot`
+- default tooling in the image: `chromium`, `node`, `npm`, `npx`,
+  `agent-browser`, and `cisco-ai-skill-scanner`
+
+That baseline is meant to make generated images immediately usable for OpenClaw
+execution, browser automation, and skill security checks, while still allowing
+the operator to add more Python, Node.js, and system dependencies through the
+manifest.
+
+Important boundary:
+
+- these defaults reduce common mistakes, but they do not replace host-level
+  hardening. Docker daemon access, `docker.sock` mounts, firewalling, rootless
+  Docker, user namespaces, seccomp/AppArmor/SELinux, and patch management still
+  need to be handled operationally.
+
+The baseline is aligned with the
+[OWASP Cheat Sheet Series](https://github.com/OWASP/CheatSheetSeries),
+especially the
+[Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)
+and the
+[AI Agent Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html).
+There is also a dedicated `Security Notes` page in this documentation set.
+
 ## Manifest Shape
 
 `openclawenv.toml` contains five top-level sections:
@@ -394,7 +446,7 @@ mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
 network = "none"
-read_only_root = false
+read_only_root = true
 ```
 
 The `agent` section supports both inline markdown content and relative `.md`
@@ -405,6 +457,28 @@ Even if they are not declared manually, OpenClaw-env-manager normalizes manifest
 `deus-context-engine`, `self-improving-agent`, `skill-security-review`,
 `freeride`, and `agent-browser-clawdbot` remain present in the effective skill
 set. `openenv init` writes them explicitly into the starter manifest.
+
+Security-sensitive defaults are also generated automatically:
+- `read_only_root = true` for the OpenClaw sandbox by default
+- explicit `openclaw.tools.allow` / `deny` lists by default, while risky
+  wildcard or broad tool scopes remain possible as explicit operator choices
+  and are surfaced as security warnings
+- localhost-only host port bindings in generated Compose files
+- `cap_drop: [ALL]`, `no-new-privileges`, read-only root filesystems, `tmpfs`,
+  and process/file descriptor limits in generated Compose services
+
+These defaults are intentionally aligned with the
+[OWASP Cheat Sheet Series](https://github.com/OWASP/CheatSheetSeries),
+especially the official
+[Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)
+and
+[AI Agent Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html).
+OpenClaw-env-manager uses them as the baseline for generated images, Compose
+stacks, tool scoping, and agent runtime guardrails. The project keeps a
+secure-by-default posture without silently overriding explicit operator intent:
+if a manifest or runtime override weakens the baseline, `validate`, `export`,
+and `build` flows emit clear non-blocking security warnings instead of
+preventing the change outright.
 
 ## CLI
 
@@ -560,6 +634,9 @@ The generated image writes:
   `agent-browser install` during image build so the browser runtime is prepared
 - the `cisco-ai-skill-scanner==2.0.4` CLI installed in the image for in-container
   skill scanning
+- Python packages installed into an image-local virtual environment under
+  `/opt/openclawenv/.venv`, which keeps Docker builds compatible with
+  `PEP 668` system Python protections
 - the `freeride` skill installed from ClawHub into the real OpenClaw workspace
   and exposed through `~/.openclaw -> /opt/openclaw`, so `freeride auto` updates
   the same `openclaw.json` used by the container

@@ -387,6 +387,52 @@ read_only_root = false
 
         self.assertIn("project.runtime", str(ctx.exception))
 
+    def test_allows_wildcard_tool_policies_but_rejects_overlap(self) -> None:
+        wildcard_raw = """
+schema_version = 1
+
+[project]
+name = "wild-agent"
+version = "0.1.0"
+description = "bad tools"
+runtime = "openclaw"
+
+[runtime]
+base_image = "python:3.12-slim@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+python_version = "3.12"
+
+[agent]
+agents_md = "a"
+soul_md = "b"
+user_md = "c"
+
+[openclaw]
+agent_id = "main"
+agent_name = "Wild Agent"
+
+[openclaw.sandbox]
+mode = "workspace-write"
+scope = "session"
+workspace_access = "full"
+network = "none"
+read_only_root = true
+
+[openclaw.tools]
+allow = ["*"]
+deny = []
+"""
+        manifest = parse_manifest(tomllib.loads(wildcard_raw))
+        self.assertEqual(manifest.openclaw.tools_allow, ["*"])
+
+        overlap_raw = wildcard_raw.replace('allow = ["*"]', 'allow = ["shell_command"]').replace(
+            "deny = []",
+            'deny = ["shell_command"]',
+        )
+        with self.assertRaises(ValidationError) as overlap_ctx:
+            parse_manifest(tomllib.loads(overlap_raw))
+
+        self.assertIn("cannot overlap", str(overlap_ctx.exception))
+
     def test_rejects_relative_runtime_workdir(self) -> None:
         raw = """
 schema_version = 1

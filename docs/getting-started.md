@@ -45,6 +45,7 @@ make docs-serve
 
 - project overview and workflow notes
 - operational concepts such as manifests, lockfiles, and generated artifacts
+- security notes describing the secure-by-default baseline and operator-visible advisories
 - API pages generated directly from the Python source tree with `mkdocstrings`
 
 ## CI Integration

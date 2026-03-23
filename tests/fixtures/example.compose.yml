@@ -13,6 +13,19 @@ services:
       HOME: "/home/node"
       TERM: "xterm-256color"
       TZ: "${OPENCLAW_TZ:-UTC}"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - "${OPENCLAW_TMPFS:-/tmp:rw,noexec,nosuid,nodev,size=64m}"
+    pids_limit: "${OPENCLAW_PIDS_LIMIT:-256}"
+    ulimits:
+      nofile:
+        soft: "${OPENCLAW_NOFILE_SOFT:-1024}"
+        hard: "${OPENCLAW_NOFILE_HARD:-2048}"
+      nproc: "${OPENCLAW_NPROC:-512}"
     volumes:
       - "${OPENCLAW_CONFIG_DIR:-./.openclaw}:/home/node/.openclaw"
       - "${OPENCLAW_WORKSPACE_DIR:-./workspace}:/home/node/.openclaw/workspace"
@@ -20,13 +33,14 @@ services:
       ## (agents.defaults.sandbox). Requires Docker CLI in the image
       ## (build with --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1) or use
       ## scripts/docker/setup.sh with OPENCLAW_SANDBOX=1 for automated setup.
+      ## WARNING: mounting /var/run/docker.sock grants host root-equivalent access.
       ## Set DOCKER_GID to the host docker group GID before enabling it.
       # - "/var/run/docker.sock:/var/run/docker.sock"
     # group_add:
     #   - "${DOCKER_GID:-999}"
     ports:
-      - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
-      - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"
+      - "${OPENCLAW_GATEWAY_HOST_BIND:-127.0.0.1}:${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+      - "${OPENCLAW_BRIDGE_HOST_BIND:-127.0.0.1}:${OPENCLAW_BRIDGE_PORT:-18790}:18790"
     init: true
     restart: unless-stopped
     command:
@@ -57,10 +71,18 @@ services:
     container_name: "operations-agent-openclaw-cli"
     network_mode: "service:openclaw-gateway"
     cap_drop:
-      - NET_RAW
-      - NET_ADMIN
+      - ALL
     security_opt:
       - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - "${OPENCLAW_TMPFS:-/tmp:rw,noexec,nosuid,nodev,size=64m}"
+    pids_limit: "${OPENCLAW_PIDS_LIMIT:-256}"
+    ulimits:
+      nofile:
+        soft: "${OPENCLAW_NOFILE_SOFT:-1024}"
+        hard: "${OPENCLAW_NOFILE_HARD:-2048}"
+      nproc: "${OPENCLAW_NPROC:-512}"
     env_file:
       - ".operations-agent.env"
     environment:

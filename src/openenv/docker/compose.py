@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from openenv.core.models import Manifest
+from openenv.core.security import assess_runtime_env_security
 from openenv.core.utils import slugify_name
 
 
@@ -16,10 +17,17 @@ OPENCLAW_CLI_SERVICE = "openclaw-cli"
 DEFAULT_OPENCLAW_HOME = "/home/node"
 DEFAULT_OPENCLAW_CONFIG_DIR = "./.openclaw"
 DEFAULT_OPENCLAW_WORKSPACE_DIR = "./workspace"
+DEFAULT_OPENCLAW_GATEWAY_HOST_BIND = "127.0.0.1"
+DEFAULT_OPENCLAW_BRIDGE_HOST_BIND = "127.0.0.1"
 DEFAULT_OPENCLAW_GATEWAY_PORT = "18789"
 DEFAULT_OPENCLAW_BRIDGE_PORT = "18790"
 DEFAULT_OPENCLAW_GATEWAY_BIND = "lan"
 DEFAULT_OPENCLAW_TIMEZONE = "UTC"
+DEFAULT_OPENCLAW_TMPFS = "/tmp:rw,noexec,nosuid,nodev,size=64m"
+DEFAULT_OPENCLAW_PIDS_LIMIT = "256"
+DEFAULT_OPENCLAW_NOFILE_SOFT = "1024"
+DEFAULT_OPENCLAW_NOFILE_HARD = "2048"
+DEFAULT_OPENCLAW_NPROC = "512"
 DEFAULT_BUILD_CONTEXT = "."
 DEFAULT_DOCKERFILE_NAME = "Dockerfile"
 LEGACY_OPENCLAW_IMAGE = "alpine/openclaw:main"
@@ -103,6 +111,19 @@ def render_compose(manifest: Manifest, image_tag: str) -> str:
     lines.extend(_render_environment(gateway_env))
     lines.extend(
         [
+            "    cap_drop:",
+            "      - ALL",
+            "    security_opt:",
+            "      - no-new-privileges:true",
+            "    read_only: true",
+            "    tmpfs:",
+            f'      - "${{OPENCLAW_TMPFS:-{DEFAULT_OPENCLAW_TMPFS}}}"',
+            f'    pids_limit: "${{OPENCLAW_PIDS_LIMIT:-{DEFAULT_OPENCLAW_PIDS_LIMIT}}}"',
+            "    ulimits:",
+            "      nofile:",
+            f'        soft: "${{OPENCLAW_NOFILE_SOFT:-{DEFAULT_OPENCLAW_NOFILE_SOFT}}}"',
+            f'        hard: "${{OPENCLAW_NOFILE_HARD:-{DEFAULT_OPENCLAW_NOFILE_HARD}}}"',
+            f'      nproc: "${{OPENCLAW_NPROC:-{DEFAULT_OPENCLAW_NPROC}}}"',
             "    volumes:",
             f"      - {_quoted(config_mount)}",
             f"      - {_quoted(workspace_mount)}",
@@ -110,13 +131,20 @@ def render_compose(manifest: Manifest, image_tag: str) -> str:
             "      ## (agents.defaults.sandbox). Requires Docker CLI in the image",
             "      ## (build with --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1) or use",
             "      ## scripts/docker/setup.sh with OPENCLAW_SANDBOX=1 for automated setup.",
+            "      ## WARNING: mounting /var/run/docker.sock grants host root-equivalent access.",
             "      ## Set DOCKER_GID to the host docker group GID before enabling it.",
             '      # - "/var/run/docker.sock:/var/run/docker.sock"',
             "    # group_add:",
             '    #   - "${DOCKER_GID:-999}"',
             "    ports:",
-            f'      - "${{OPENCLAW_GATEWAY_PORT:-{DEFAULT_OPENCLAW_GATEWAY_PORT}}}:18789"',
-            f'      - "${{OPENCLAW_BRIDGE_PORT:-{DEFAULT_OPENCLAW_BRIDGE_PORT}}}:18790"',
+            (
+                f'      - "${{OPENCLAW_GATEWAY_HOST_BIND:-{DEFAULT_OPENCLAW_GATEWAY_HOST_BIND}}}'
+                f':${{OPENCLAW_GATEWAY_PORT:-{DEFAULT_OPENCLAW_GATEWAY_PORT}}}:18789"'
+            ),
+            (
+                f'      - "${{OPENCLAW_BRIDGE_HOST_BIND:-{DEFAULT_OPENCLAW_BRIDGE_HOST_BIND}}}'
+                f':${{OPENCLAW_BRIDGE_PORT:-{DEFAULT_OPENCLAW_BRIDGE_PORT}}}:18790"'
+            ),
             "    init: true",
             "    restart: unless-stopped",
             "    command:",
@@ -147,10 +175,18 @@ def render_compose(manifest: Manifest, image_tag: str) -> str:
             f"    container_name: {_quoted(cli_name)}",
             '    network_mode: "service:openclaw-gateway"',
             "    cap_drop:",
-            "      - NET_RAW",
-            "      - NET_ADMIN",
+            "      - ALL",
             "    security_opt:",
             "      - no-new-privileges:true",
+            "    read_only: true",
+            "    tmpfs:",
+            f'      - "${{OPENCLAW_TMPFS:-{DEFAULT_OPENCLAW_TMPFS}}}"',
+            f'    pids_limit: "${{OPENCLAW_PIDS_LIMIT:-{DEFAULT_OPENCLAW_PIDS_LIMIT}}}"',
+            "    ulimits:",
+            "      nofile:",
+            f'        soft: "${{OPENCLAW_NOFILE_SOFT:-{DEFAULT_OPENCLAW_NOFILE_SOFT}}}"',
+            f'        hard: "${{OPENCLAW_NOFILE_HARD:-{DEFAULT_OPENCLAW_NOFILE_HARD}}}"',
+            f'      nproc: "${{OPENCLAW_NPROC:-{DEFAULT_OPENCLAW_NPROC}}}"',
             "    env_file:",
             f"      - {_quoted(env_file)}",
             "    environment:",
@@ -187,6 +223,19 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
     lines.extend(_render_environment(_shared_gateway_environment()))
     lines.extend(
         [
+            "    cap_drop:",
+            "      - ALL",
+            "    security_opt:",
+            "      - no-new-privileges:true",
+            "    read_only: true",
+            "    tmpfs:",
+            f'      - "${{OPENCLAW_TMPFS:-{DEFAULT_OPENCLAW_TMPFS}}}"',
+            f'    pids_limit: "${{OPENCLAW_PIDS_LIMIT:-{DEFAULT_OPENCLAW_PIDS_LIMIT}}}"',
+            "    ulimits:",
+            "      nofile:",
+            f'        soft: "${{OPENCLAW_NOFILE_SOFT:-{DEFAULT_OPENCLAW_NOFILE_SOFT}}}"',
+            f'        hard: "${{OPENCLAW_NOFILE_HARD:-{DEFAULT_OPENCLAW_NOFILE_HARD}}}"',
+            f'      nproc: "${{OPENCLAW_NPROC:-{DEFAULT_OPENCLAW_NPROC}}}"',
             "    volumes:",
             (
                 f'      - "{ALL_BOTS_GATEWAY_CONFIG_DIR}:'
@@ -197,8 +246,14 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
                 f'{DEFAULT_OPENCLAW_HOME}/.openclaw/workspace"'
             ),
             "    ports:",
-            f'      - "${{OPENCLAW_GATEWAY_PORT:-{DEFAULT_OPENCLAW_GATEWAY_PORT}}}:18789"',
-            f'      - "${{OPENCLAW_BRIDGE_PORT:-{DEFAULT_OPENCLAW_BRIDGE_PORT}}}:18790"',
+            (
+                f'      - "${{OPENCLAW_GATEWAY_HOST_BIND:-{DEFAULT_OPENCLAW_GATEWAY_HOST_BIND}}}'
+                f':${{OPENCLAW_GATEWAY_PORT:-{DEFAULT_OPENCLAW_GATEWAY_PORT}}}:18789"'
+            ),
+            (
+                f'      - "${{OPENCLAW_BRIDGE_HOST_BIND:-{DEFAULT_OPENCLAW_BRIDGE_HOST_BIND}}}'
+                f':${{OPENCLAW_BRIDGE_PORT:-{DEFAULT_OPENCLAW_BRIDGE_PORT}}}:18790"'
+            ),
             "    init: true",
             "    restart: unless-stopped",
             "    command:",
@@ -246,10 +301,18 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
                 f"    container_name: {_quoted(container_name)}",
                 '    network_mode: "service:openclaw-gateway"',
                 "    cap_drop:",
-                "      - NET_RAW",
-                "      - NET_ADMIN",
+                "      - ALL",
                 "    security_opt:",
                 "      - no-new-privileges:true",
+                "    read_only: true",
+                "    tmpfs:",
+                f'      - "${{OPENCLAW_TMPFS:-{DEFAULT_OPENCLAW_TMPFS}}}"',
+                f'    pids_limit: "${{OPENCLAW_PIDS_LIMIT:-{DEFAULT_OPENCLAW_PIDS_LIMIT}}}"',
+                "    ulimits:",
+                "      nofile:",
+                f'        soft: "${{OPENCLAW_NOFILE_SOFT:-{DEFAULT_OPENCLAW_NOFILE_SOFT}}}"',
+                f'        hard: "${{OPENCLAW_NOFILE_HARD:-{DEFAULT_OPENCLAW_NOFILE_HARD}}}"',
+                f'      nproc: "${{OPENCLAW_NPROC:-{DEFAULT_OPENCLAW_NPROC}}}"',
                 "    env_file:",
                 f"      - {_quoted(env_file)}",
                 "    environment:",
@@ -302,9 +365,16 @@ def render_env_file(
         "OPENCLAW_IMAGE": image_tag,
         "OPENCLAW_CONFIG_DIR": DEFAULT_OPENCLAW_CONFIG_DIR,
         "OPENCLAW_WORKSPACE_DIR": DEFAULT_OPENCLAW_WORKSPACE_DIR,
+        "OPENCLAW_GATEWAY_HOST_BIND": DEFAULT_OPENCLAW_GATEWAY_HOST_BIND,
+        "OPENCLAW_BRIDGE_HOST_BIND": DEFAULT_OPENCLAW_BRIDGE_HOST_BIND,
         "OPENCLAW_GATEWAY_PORT": DEFAULT_OPENCLAW_GATEWAY_PORT,
         "OPENCLAW_BRIDGE_PORT": DEFAULT_OPENCLAW_BRIDGE_PORT,
         "OPENCLAW_GATEWAY_BIND": DEFAULT_OPENCLAW_GATEWAY_BIND,
+        "OPENCLAW_TMPFS": DEFAULT_OPENCLAW_TMPFS,
+        "OPENCLAW_PIDS_LIMIT": DEFAULT_OPENCLAW_PIDS_LIMIT,
+        "OPENCLAW_NOFILE_SOFT": DEFAULT_OPENCLAW_NOFILE_SOFT,
+        "OPENCLAW_NOFILE_HARD": DEFAULT_OPENCLAW_NOFILE_HARD,
+        "OPENCLAW_NPROC": DEFAULT_OPENCLAW_NPROC,
         "OPENCLAW_TZ": DEFAULT_OPENCLAW_TIMEZONE,
     }
     for key, default in runtime_defaults.items():
@@ -321,6 +391,16 @@ def render_env_file(
     for key, default in DEFAULT_OPENCLAW_ENV_DEFAULTS:
         lines.append(f"{key}={values.get(key, default)}")
         used_keys.add(key)
+    advisory_values = {key: values.get(key, default) for key, default in runtime_defaults.items()}
+    advisory_values.update(
+        {key: values.get(key, default) for key, default in DEFAULT_OPENCLAW_ENV_DEFAULTS}
+    )
+    advisories = assess_runtime_env_security(advisory_values)
+    if advisories:
+        lines.append("")
+        lines.append("# Security advisories for explicit runtime overrides")
+        for advisory in advisories:
+            lines.append(f"# WARNING: {advisory}")
     if secret_names:
         lines.append("")
         lines.append("# Bot secret references")

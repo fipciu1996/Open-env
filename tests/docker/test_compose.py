@@ -6,6 +6,13 @@ from pathlib import Path
 
 from openenv.docker.compose import (
     AllBotsComposeSpec,
+    DEFAULT_OPENCLAW_BRIDGE_HOST_BIND,
+    DEFAULT_OPENCLAW_GATEWAY_HOST_BIND,
+    DEFAULT_OPENCLAW_NOFILE_HARD,
+    DEFAULT_OPENCLAW_NOFILE_SOFT,
+    DEFAULT_OPENCLAW_NPROC,
+    DEFAULT_OPENCLAW_PIDS_LIMIT,
+    DEFAULT_OPENCLAW_TMPFS,
     all_bots_compose_filename,
     cli_container_name,
     default_compose_filename,
@@ -42,6 +49,36 @@ class ComposeTests(unittest.TestCase):
         self.assertIn("    build:", compose_text)
         self.assertIn('      context: "."', compose_text)
         self.assertIn('      dockerfile: "Dockerfile"', compose_text)
+        self.assertIn("    cap_drop:", compose_text)
+        self.assertIn("      - ALL", compose_text)
+        self.assertIn("    security_opt:", compose_text)
+        self.assertIn("      - no-new-privileges:true", compose_text)
+        self.assertIn("    read_only: true", compose_text)
+        self.assertIn(f'      - "${{OPENCLAW_TMPFS:-{DEFAULT_OPENCLAW_TMPFS}}}"', compose_text)
+        self.assertIn(
+            f'    pids_limit: "${{OPENCLAW_PIDS_LIMIT:-{DEFAULT_OPENCLAW_PIDS_LIMIT}}}"',
+            compose_text,
+        )
+        self.assertIn(
+            f'        soft: "${{OPENCLAW_NOFILE_SOFT:-{DEFAULT_OPENCLAW_NOFILE_SOFT}}}"',
+            compose_text,
+        )
+        self.assertIn(
+            f'        hard: "${{OPENCLAW_NOFILE_HARD:-{DEFAULT_OPENCLAW_NOFILE_HARD}}}"',
+            compose_text,
+        )
+        self.assertIn(
+            f'      nproc: "${{OPENCLAW_NPROC:-{DEFAULT_OPENCLAW_NPROC}}}"',
+            compose_text,
+        )
+        self.assertIn(
+            f'${{OPENCLAW_GATEWAY_HOST_BIND:-{DEFAULT_OPENCLAW_GATEWAY_HOST_BIND}}}',
+            compose_text,
+        )
+        self.assertIn(
+            f'${{OPENCLAW_BRIDGE_HOST_BIND:-{DEFAULT_OPENCLAW_BRIDGE_HOST_BIND}}}',
+            compose_text,
+        )
 
     def test_default_compose_filename_uses_bot_name(self) -> None:
         self.assertEqual(
@@ -75,6 +112,31 @@ class ComposeTests(unittest.TestCase):
         expected = (FIXTURES / "example.bot.env").read_text(encoding="utf-8")
 
         self.assertEqual(env_text, expected)
+        self.assertIn(
+            f"OPENCLAW_GATEWAY_HOST_BIND={DEFAULT_OPENCLAW_GATEWAY_HOST_BIND}",
+            env_text,
+        )
+        self.assertIn(
+            f"OPENCLAW_BRIDGE_HOST_BIND={DEFAULT_OPENCLAW_BRIDGE_HOST_BIND}",
+            env_text,
+        )
+        self.assertIn(f"OPENCLAW_TMPFS={DEFAULT_OPENCLAW_TMPFS}", env_text)
+
+    def test_env_file_includes_security_advisories_for_risky_runtime_overrides(self) -> None:
+        manifest, _ = load_manifest(FIXTURES / "example.openclawenv.toml")
+
+        env_text = render_env_file(
+            manifest,
+            "openclawenv/ops-agent:1.2.3",
+            existing_values={
+                "OPENCLAW_GATEWAY_HOST_BIND": "0.0.0.0",
+                "OPENCLAW_ALLOW_INSECURE_PRIVATE_WS": "1",
+            },
+        )
+
+        self.assertIn("# Security advisories for explicit runtime overrides", env_text)
+        self.assertIn("# WARNING: OPENCLAW_GATEWAY_HOST_BIND exposes the gateway", env_text)
+        self.assertIn("# WARNING: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS is enabled", env_text)
 
     def test_render_all_bots_compose_contains_shared_gateway_and_each_bot(self) -> None:
         manifest, _ = load_manifest(FIXTURES / "example.openclawenv.toml")
@@ -108,4 +170,6 @@ class ComposeTests(unittest.TestCase):
         self.assertIn('      context: "./analytics-agent"', compose_text)
         self.assertIn('      - "./operations-agent/.operations-agent.env"', compose_text)
         self.assertIn('      - "./analytics-agent/.analytics-agent.env"', compose_text)
+        self.assertIn('      - ALL', compose_text)
+        self.assertIn('    read_only: true', compose_text)
 

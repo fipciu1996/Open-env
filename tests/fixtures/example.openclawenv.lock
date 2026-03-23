@@ -5,7 +5,7 @@
     "resolved_reference": "python:3.12-slim@sha256:1111111111111111111111111111111111111111111111111111111111111111"
   },
   "lock_version": 1,
-  "manifest_hash": "292110ecf385f765940d938b6a407f808dd6e4463c31b1d9fbcd0d25263c4531",
+  "manifest_hash": "0f001558bbf99ce5f5e52d1d00df81a929556026896e69f7b11922d91425924a",
   "node_packages": [
     {
       "kind": "pinned",
@@ -55,7 +55,7 @@
       "sandbox": {
         "mode": "workspace-write",
         "network": "none",
-        "read_only_root": false,
+        "read_only_root": true,
         "scope": "session",
         "workspace_access": "full"
       },
@@ -72,7 +72,7 @@
       "runtime": "openclaw",
       "version": "1.2.3"
     },
-    "raw_manifest_sha256": "13c1fa47e9091c45e4506e4512a7ff3d8df86d42dfe62cdd03862cf313533771",
+    "raw_manifest_sha256": "a53e087d06e17def4dbe6d879f027f29f2b1f11929074a992cea1e394963304a",
     "runtime": {
       "base_image": "python:3.12-slim@sha256:1111111111111111111111111111111111111111111111111111111111111111",
       "env": {

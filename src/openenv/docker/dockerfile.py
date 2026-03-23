@@ -13,14 +13,15 @@ from openenv.core.utils import encode_payload, stable_json_dumps
 SKILL_SCANNER_REQUIREMENT = "cisco-ai-skill-scanner==2.0.4"
 OPENCLAW_GATEWAY_RUNTIME_IMAGE = "alpine/openclaw:main"
 DEFAULT_NODE_PACKAGES = ("nodejs", "npm")
-DEFAULT_PYTHON_PACKAGES_APT = ("python3", "python3-pip", "bash")
-DEFAULT_PYTHON_PACKAGES_APK = ("python3", "py3-pip", "bash")
+DEFAULT_PYTHON_PACKAGES_APT = ("python3", "python3-pip", "python3-venv", "bash")
+DEFAULT_PYTHON_PACKAGES_APK = ("python3", "py3-pip", "py3-virtualenv", "bash")
 DEFAULT_GLOBAL_NODE_TOOLS = ("agent-browser",)
 DEFAULT_SKILL_SCAN_FORMAT = "summary"
 DEFAULT_SKILL_SCAN_POLICY = "balanced"
 DEFAULT_SKILL_SCAN_FAIL_ON_SEVERITY = "high"
 DEFAULT_OPENCLAW_RUNTIME_USER = "node"
 DEFAULT_OPENCLAW_RUNTIME_HOME = "/home/node"
+DEFAULT_PYTHON_VENV_PATH = "/opt/openclawenv/.venv"
 
 
 def render_dockerfile(
@@ -53,6 +54,7 @@ def render_dockerfile(
         lines.append(f"ENV {key}={json.dumps(value)}")
     lines.extend(_package_install_lines(manifest.runtime.system_packages))
     lines.extend(_python_binary_link_lines())
+    lines.extend(_python_venv_lines())
     lines.append(
         "RUN if ! command -v npx >/dev/null 2>&1; then "
         "printf '%s\\n' '#!/bin/sh' 'exec npm exec --yes -- \"$@\"' "
@@ -163,6 +165,18 @@ def _python_binary_link_lines() -> list[str]:
         "RUN mkdir -p /usr/local/bin && "
         "if ! command -v pip >/dev/null 2>&1 && command -v pip3 >/dev/null 2>&1; then "
         'ln -sf "$(command -v pip3)" /usr/local/bin/pip; fi',
+    ]
+
+
+def _python_venv_lines() -> list[str]:
+    """Create and activate an image-local virtualenv for Python package installation."""
+    return [
+        "RUN python -m venv "
+        f'"{DEFAULT_PYTHON_VENV_PATH}"'
+        " 2>/dev/null || python -m virtualenv "
+        f'"{DEFAULT_PYTHON_VENV_PATH}"',
+        f'ENV VIRTUAL_ENV="{DEFAULT_PYTHON_VENV_PATH}"',
+        f'ENV PATH="{DEFAULT_PYTHON_VENV_PATH}/bin:$PATH"',
     ]
 
 

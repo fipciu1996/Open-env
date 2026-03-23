@@ -11,6 +11,7 @@ from loguru import logger
 from openenv.bots.manager import interactive_menu
 from openenv.core.errors import CommandError, OpenEnvError
 from openenv.core.models import Lockfile, Manifest
+from openenv.core.security import assess_manifest_security, assess_runtime_env_security
 from openenv.docker.builder import build_image_with_args, default_image_tag
 from openenv.docker.compose import (
     default_compose_filename,
@@ -170,6 +171,7 @@ def _handle_init(args: argparse.Namespace) -> int:
 def _handle_validate(args: argparse.Namespace) -> int:
     """Validate a manifest and print a short summary for the operator."""
     manifest, _ = load_manifest(_resolve_manifest_path_argument(args.path))
+    _log_manifest_security_advisories(manifest)
     logger.info(
         "Manifest valid: "
         f"{manifest.project.name} {manifest.project.version} "
@@ -183,6 +185,7 @@ def _handle_lock(args: argparse.Namespace) -> int:
     """Resolve the manifest into a deterministic lockfile and write it to disk."""
     manifest_path = _resolve_manifest_path_argument(args.path)
     manifest, raw_manifest_text = load_manifest(manifest_path)
+    _log_manifest_security_advisories(manifest)
     lockfile = build_lockfile(manifest, raw_manifest_text)
     write_lockfile(args.output, lockfile)
     logger.info("Wrote lockfile to {}", args.output)
@@ -193,6 +196,7 @@ def _handle_scan(args: argparse.Namespace) -> int:
     """Materialize skills from the manifest and run the external skill scanner."""
     manifest_path = _resolve_manifest_path_argument(args.path)
     manifest, _ = load_manifest(manifest_path)
+    _log_manifest_security_advisories(manifest)
     scan_dir = run_skill_scanner(
         manifest_path,
         manifest,
@@ -208,6 +212,9 @@ def _handle_scan(args: argparse.Namespace) -> int:
 
 def _handle_export_dockerfile(args: argparse.Namespace) -> int:
     """Render the locked Dockerfile and either print it or save it to disk."""
+    if args.output:
+        manifest, _ = load_manifest(_resolve_manifest_path_argument(args.path))
+        _log_manifest_security_advisories(manifest)
     dockerfile_text = _render_locked_dockerfile(
         manifest_path=args.path,
         lock_path=args.lock,
@@ -224,6 +231,7 @@ def _handle_build(args: argparse.Namespace) -> int:
     """Build the Docker image and emit the compose bundle beside the manifest."""
     manifest_path = _resolve_manifest_path_argument(args.path)
     manifest, _ = load_manifest(manifest_path)
+    _log_manifest_security_advisories(manifest)
     dockerfile_text = _render_locked_dockerfile(
         manifest_path=manifest_path,
         lock_path=_resolve_lock_path_argument(args.lock, manifest_path=manifest_path),
@@ -256,6 +264,7 @@ def _handle_export_compose(args: argparse.Namespace) -> int:
     manifest_path = _resolve_manifest_path_argument(args.path)
     lock_path = _resolve_lock_path_argument(args.lock, manifest_path=manifest_path)
     manifest, _ = load_manifest(manifest_path)
+    _log_manifest_security_advisories(manifest)
     _load_and_verify_lockfile(manifest_path, lock_path)
     tag = args.tag or default_image_tag(manifest.project.name, manifest.project.version)
     compose_path = Path(args.output) if args.output else None
@@ -393,8 +402,21 @@ def _write_compose_bundle(
     existing_values = load_secret_values(env_target)
     if source_env_path.exists():
         existing_values.update(load_secret_values(source_env_path))
+    _log_runtime_env_advisories(existing_values)
     write_env_file(
         env_target,
         render_env_file(manifest, image_tag, existing_values=existing_values),
     )
     return dockerfile_target, compose_target, env_target
+
+
+def _log_manifest_security_advisories(manifest: Manifest) -> None:
+    """Emit non-blocking security warnings for risky manifest choices."""
+    for advisory in assess_manifest_security(manifest):
+        logger.warning("security warning: {}", advisory)
+
+
+def _log_runtime_env_advisories(values: dict[str, str]) -> None:
+    """Emit non-blocking security warnings for risky runtime env overrides."""
+    for advisory in assess_runtime_env_security(values):
+        logger.warning("security warning: {}", advisory)

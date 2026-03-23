@@ -56,6 +56,12 @@ The workflow includes:
 - build-time scanning in the Dockerfile
 - runtime snapshotting from a running bot container
 
+The generated image also includes a default runtime toolset so a freshly built
+bot can start with OpenClaw-compatible browser and scanning capabilities. That
+baseline currently includes `chromium`, Node.js with `npm`/`npx`,
+`agent-browser`, `cisco-ai-skill-scanner`, and the mandatory skills documented
+on the `Security Notes` page.
+
 ## API Reference Strategy
 
 The API pages in this site are generated with `mkdocstrings`. That means the

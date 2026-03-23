@@ -2,12 +2,15 @@ site_name: OpenClaw-env-manager
 site_description: Declarative OpenClaw environments, manifests, Docker generation, and bot operations.
 repo_url: https://github.com/fipciu1996/OpenClaw-env-manager
 repo_name: fipciu1996/OpenClaw-env-manager
+hooks:
+  - docs/hooks.py
 theme:
-  name: readthedocs
+  name: shadcn
 nav:
   - Overview: index.md
   - Getting Started: getting-started.md
   - Concepts: concepts.md
+  - Security Notes: security.md
   - openclawenv.toml Structure: openclawenv-toml.md
   - Changelog: changelog.md
   - API:

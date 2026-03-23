@@ -113,7 +113,7 @@ SAMPLE_MANIFEST = dedent(
     scope = "session"
     workspace_access = "full"
     network = "none"
-    read_only_root = false
+    read_only_root = true
 
     [openclaw.tools]
     allow = ["shell_command"]

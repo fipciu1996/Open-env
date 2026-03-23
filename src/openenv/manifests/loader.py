@@ -355,6 +355,14 @@ def _validate_openclaw(config: OpenClawConfig) -> None:
         raise ValidationError("openclaw.workspace must be an absolute POSIX path.")
     if not PurePosixPath(config.state_dir).is_absolute():
         raise ValidationError("openclaw.state_dir must be an absolute POSIX path.")
+    allow_set = set(config.tools_allow)
+    deny_set = set(config.tools_deny)
+    overlapping = sorted(allow_set & deny_set)
+    if overlapping:
+        raise ValidationError(
+            "openclaw.tools.allow and openclaw.tools.deny cannot overlap: "
+            + ", ".join(overlapping)
+        )
 
 
 def _validate_skill_names(skills: list[SkillConfig]) -> None:

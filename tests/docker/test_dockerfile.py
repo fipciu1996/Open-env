@@ -6,6 +6,7 @@ from pathlib import Path
 from openenv.docker.dockerfile import (
     DEFAULT_GLOBAL_NODE_TOOLS,
     DEFAULT_NODE_PACKAGES,
+    DEFAULT_PYTHON_VENV_PATH,
     DEFAULT_SKILL_SCAN_FAIL_ON_SEVERITY,
     DEFAULT_SKILL_SCAN_FORMAT,
     DEFAULT_SKILL_SCAN_POLICY,
@@ -56,6 +57,8 @@ class DockerfileTests(unittest.TestCase):
         self.assertTrue(dockerfile.rstrip().endswith("USER node"))
         self.assertNotIn("WORKDIR /workspace", dockerfile)
         self.assertNotIn("USER agent", dockerfile)
+        self.assertIn(f'ENV VIRTUAL_ENV="{DEFAULT_PYTHON_VENV_PATH}"', dockerfile)
+        self.assertIn(f'ENV PATH="{DEFAULT_PYTHON_VENV_PATH}/bin:$PATH"', dockerfile)
 
     def test_dockerfile_always_installs_skill_scanner(self) -> None:
         manifest, raw_manifest_text = load_manifest(FIXTURES / "example.openclawenv.toml")
@@ -74,6 +77,11 @@ class DockerfileTests(unittest.TestCase):
             f"RUN python -m pip install --no-cache-dir {SKILL_SCANNER_REQUIREMENT}",
             dockerfile,
         )
+        self.assertIn(
+            f'RUN python -m venv "{DEFAULT_PYTHON_VENV_PATH}" '
+            f'2>/dev/null || python -m virtualenv "{DEFAULT_PYTHON_VENV_PATH}"',
+            dockerfile,
+        )
 
     def test_dockerfile_always_installs_nodejs_and_npx_support(self) -> None:
         manifest, raw_manifest_text = load_manifest(FIXTURES / "example.openclawenv.toml")
@@ -88,6 +96,8 @@ class DockerfileTests(unittest.TestCase):
 
         for package in DEFAULT_NODE_PACKAGES:
             self.assertIn(package, dockerfile)
+        self.assertIn("python3-venv", dockerfile)
+        self.assertIn("py3-virtualenv", dockerfile)
         for package in DEFAULT_GLOBAL_NODE_TOOLS:
             self.assertIn(package, dockerfile)
         self.assertIn("command -v npx", dockerfile)

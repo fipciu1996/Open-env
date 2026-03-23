@@ -343,6 +343,59 @@ read_only_root = false
         self.assertEqual(exit_code, 0)
         self.assertIn("Manifest valid", stdout.getvalue())
 
+    def test_validate_logs_security_warnings_for_explicit_risky_manifest_choices(self) -> None:
+        with workspace_dir() as temp_dir:
+            manifest_path = temp_dir / "openclawenv.toml"
+            manifest_path.write_text(
+                """
+schema_version = 1
+
+[project]
+name = "risky-agent"
+version = "0.1.0"
+description = "explicit risky choices"
+runtime = "openclaw"
+
+[runtime]
+base_image = "python:3.12-slim"
+python_version = "3.12"
+user = "root"
+
+[agent]
+agents_md = "a"
+soul_md = "b"
+user_md = "c"
+
+[openclaw]
+agent_id = "main"
+agent_name = "Risky Agent"
+
+[openclaw.sandbox]
+mode = "workspace-write"
+scope = "session"
+workspace_access = "full"
+network = "host"
+read_only_root = false
+
+[openclaw.tools]
+allow = ["*", "shell_command"]
+deny = []
+""".strip(),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(["validate", "--path", str(manifest_path)])
+
+            self.assertEqual(exit_code, 0)
+            output = stdout.getvalue()
+            self.assertIn("security warning:", output)
+            self.assertIn("not pinned with a digest", output)
+            self.assertIn("read_only_root is disabled", output)
+            self.assertIn("wildcard entries", output)
+            self.assertIn("includes shell_command", output)
+
     def test_scan_logs_kept_artifacts_directory(self) -> None:
         with workspace_dir() as temp_dir:
             manifest_path = temp_dir / "openclawenv.toml"
@@ -356,6 +409,36 @@ read_only_root = false
 
             self.assertEqual(exit_code, 0)
             self.assertIn(str(kept_dir), stdout.getvalue())
+
+    def test_export_compose_logs_runtime_override_security_warnings(self) -> None:
+        with workspace_dir() as temp_dir:
+            manifest_path = temp_dir / "openclawenv.toml"
+            lock_path = temp_dir / "openclawenv.lock"
+            shutil.copyfile(FIXTURES / "example.openclawenv.toml", manifest_path)
+            shutil.copyfile(FIXTURES / "example.openclawenv.lock", lock_path)
+            (temp_dir / ".operations-agent.env").write_text(
+                "OPENCLAW_GATEWAY_HOST_BIND=0.0.0.0\nOPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1\n",
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "export",
+                        "compose",
+                        "--path",
+                        str(manifest_path),
+                        "--lock",
+                        str(lock_path),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            output = stdout.getvalue()
+            self.assertIn("security warning:", output)
+            self.assertIn("gateway beyond localhost", output)
+            self.assertIn("OPENCLAW_ALLOW_INSECURE_PRIVATE_WS is enabled", output)
 
     def test_export_compose_uses_explicit_output_path(self) -> None:
         with workspace_dir() as temp_dir:

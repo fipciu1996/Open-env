@@ -73,7 +73,7 @@ mode = "workspace-write"
 scope = "session"
 workspace_access = "full"
 network = "none"
-read_only_root = false
+read_only_root = true
 ```
 
 ## `schema_version`
@@ -212,6 +212,13 @@ The nested sandbox section controls the generated OpenClaw sandbox policy.
 | `workspace_access` | yes | Workspace visibility policy. |
 | `network` | yes | Network access policy. |
 | `read_only_root` | yes | Whether the root filesystem is read-only. |
+
+Security notes:
+- `read_only_root = true` is the secure default for newly generated manifests.
+- `openclaw.tools.allow` and `openclaw.tools.deny` should prefer explicit tool
+  names. Wildcard entries such as `*` or `all` are still allowed as explicit
+  operator choices, but they trigger non-blocking security advisories during
+  validation and artifact generation.
 
 ## File Placement For Managed Bots
 

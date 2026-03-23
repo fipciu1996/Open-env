@@ -216,7 +216,7 @@ class SandboxConfig:
     scope: str = "session"
     workspace_access: str = "full"
     network: str = "none"
-    read_only_root: bool = False
+    read_only_root: bool = True
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize the sandbox policy using manifest-oriented field names."""
