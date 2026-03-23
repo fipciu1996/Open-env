@@ -15,6 +15,7 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changes
 * GitHub Actions now publishes the MkDocs documentation site to GitHub Pages, while keeping the generated coverage report under `/coverage/` on the same deployed site.
+* Replaced the deprecated Node 20 GitHub Pages actions with a repository-managed deploy script that publishes the generated site to the `gh-pages` branch.
 
 ### Fixes
 

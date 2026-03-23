@@ -47,7 +47,8 @@ pushes to `main`. The same deployed Pages site also contains the HTML coverage
 report plus the generated coverage badge.
 
 Once GitHub Pages is enabled for the repository with `Build and deployment`
-configured to `GitHub Actions`, the published docs site is available at
+configured to `Deploy from a branch` and branch `gh-pages` at `/ (root)`, the
+published docs site is available at
 [fipciu1996.github.io/OpenClaw-env-manager/](https://fipciu1996.github.io/OpenClaw-env-manager/),
 while the coverage report stays under
 [fipciu1996.github.io/OpenClaw-env-manager/coverage/](https://fipciu1996.github.io/OpenClaw-env-manager/coverage/).
@@ -106,6 +107,31 @@ Once the package is published, installation from PyPI is:
 python -m pip install OpenClaw-env-manager
 ```
 
+On Debian and Ubuntu systems with `PEP 668` enabled, direct installation into
+the system Python may fail with `externally-managed-environment`. The safest
+installation options for the published CLI are:
+
+1. `pipx` for a standalone CLI install:
+
+```bash
+apt update
+apt install -y pipx python3-venv
+pipx install OpenClaw-env-manager
+~/.local/bin/clawopenenv --help
+```
+
+2. `virtualenv` for an isolated Python environment:
+
+```bash
+apt update
+apt install -y python3-venv
+python3 -m venv /opt/openclaw-env-manager
+source /opt/openclaw-env-manager/bin/activate
+pip install -U pip
+pip install OpenClaw-env-manager
+clawopenenv --help
+```
+
 The installed console command is:
 
 ```bash
@@ -154,8 +180,9 @@ make docs-build
 make docs-serve
 ```
 
-The latest documentation is also published from GitHub Actions to the root
-GitHub Pages site on pushes to `main`.
+The latest documentation is also published from GitHub Actions to the `gh-pages`
+branch on pushes to `main`, and GitHub Pages serves that branch as the public
+site.
 
 Versioned documentation publishing remains configured for GitLab Pages in
 `.gitlab-ci.yml`. The GitLab deployment model is:
