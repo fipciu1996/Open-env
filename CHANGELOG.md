@@ -12,15 +12,23 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ---
 
 ### New
+
+### Changes
+
+### Fixes
+
+### Breaks
+
+
+## 1.2.0 - (2026-03-23)
+---
+
+### New
 * Added dedicated security documentation covering the secure-by-default baseline, default skills and tools, advisory behavior, and OWASP-aligned operator guidance.
 
 ### Changes
 * Hardened generated manifests and Compose artifacts with stronger secure-by-default settings while preserving explicit operator choices through non-blocking security advisories.
 * Switched the MkDocs site to the `mkdocs-shadcn` theme and added a repository-local documentation hook so builds do not require global Git `safe.directory` changes.
-
-### Fixes
-
-### Breaks
 
 
 ## 1.1.2 - (2026-03-23)
