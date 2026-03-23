@@ -12,7 +12,7 @@ INDEX_HTML = """<!doctype html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Open-env Coverage</title>
+    <title>OpenClaw-env-manager Coverage</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -27,7 +27,7 @@ INDEX_HTML = """<!doctype html>
     </style>
   </head>
   <body>
-    <h1>Open-env Coverage</h1>
+    <h1>OpenClaw-env-manager Coverage</h1>
     <p>This site publishes the latest GitHub Actions coverage report.</p>
     <ul>
       <li><a class="badge-link" href="./coverage/index.html">Open HTML coverage report</a></li>

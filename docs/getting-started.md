@@ -2,7 +2,7 @@
 
 ## Install Development Dependencies
 
-Open-env itself requires Python `3.12+`. For documentation work, install the
+OpenClaw-env-manager itself requires Python `3.12+`. For documentation work, install the
 extra docs dependencies:
 
 ```bash

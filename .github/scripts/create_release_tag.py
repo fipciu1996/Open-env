@@ -169,7 +169,7 @@ def create_release_commit(version: str, commit_message: str) -> None:
 
 def create_tag(tag: str, version: str, message: str | None) -> None:
     """Create the final annotated Git tag for the prepared release commit."""
-    tag_message = message or f"Open-env {version}\n\nRelease {version}."
+    tag_message = message or f"OpenClaw-env-manager {version}\n\nRelease {version}."
     run_git("tag", "-a", tag, "-m", tag_message)
     print(f"Created annotated tag {tag}.")
 

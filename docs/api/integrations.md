@@ -1,6 +1,6 @@
 # Integrations
 
-External integrations connect Open-env to tool ecosystems such as OpenRouter and
+External integrations connect OpenClaw-env-manager to tool ecosystems such as OpenRouter and
 Cisco Skill Scanner.
 
 ## `openenv.integrations`

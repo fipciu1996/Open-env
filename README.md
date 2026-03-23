@@ -1,9 +1,9 @@
-# Open-env
+# OpenClaw-env-manager
 
-[![CI](https://github.com/fipciu1996/Open-env/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/fipciu1996/Open-env/actions/workflows/ci.yml)
-[![Coverage](https://fipciu1996.github.io/Open-env/coverage.svg)](https://fipciu1996.github.io/Open-env/coverage/)
+[![CI](https://github.com/fipciu1996/OpenClaw-env-manager/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/fipciu1996/OpenClaw-env-manager/actions/workflows/ci.yml)
+[![Coverage](https://fipciu1996.github.io/OpenClaw-env-manager/coverage.svg)](https://fipciu1996.github.io/OpenClaw-env-manager/coverage/)
 
-Open-env is a Python CLI for defining an OpenClaw agent environment in one
+OpenClaw-env-manager is a Python CLI for defining an OpenClaw agent environment in one
 declarative `openenv.toml` file and turning it into deterministic Docker
 artifacts.
 
@@ -47,7 +47,7 @@ badge to GitHub Pages for pushes to `main`.
 
 Once GitHub Pages is enabled for the repository with `Build and deployment`
 configured to `GitHub Actions`, the published coverage site is available at
-[fipciu1996.github.io/Open-env/coverage/](https://fipciu1996.github.io/Open-env/coverage/).
+[fipciu1996.github.io/OpenClaw-env-manager/coverage/](https://fipciu1996.github.io/OpenClaw-env-manager/coverage/).
 
 ## Releases And PyPI
 
@@ -67,11 +67,11 @@ Example release tag:
 
 ```bash
 make install-hooks
-make release-tag VERSION=1.0.1 TAG_MESSAGE="Open-env 1.0.1"
+make release-tag VERSION=1.0.1 TAG_MESSAGE="OpenClaw-env-manager 1.0.1"
 git push origin 1.0.1
 ```
 
-Git does not provide a native `pre-tag` hook, so Open-env uses a practical
+Git does not provide a native `pre-tag` hook, so OpenClaw-env-manager uses a practical
 replacement:
 
 - `python .github/scripts/create_release_tag.py <tag>` or
@@ -112,7 +112,7 @@ clawopenenv
 Before the first release, configure a PyPI Trusted Publisher for:
 
 - owner: `fipciu1996`
-- repository: `Open-env`
+- repository: `OpenClaw-env-manager`
 - workflow: `.github/workflows/publish-pypi.yml`
 
 ## Documentation
@@ -165,7 +165,7 @@ GitLab Premium and Ultimate. Branch previews are configured to expire after
 
 ## Host Prerequisites
 
-Before using Open-env on a workstation or CI runner, install:
+Before using OpenClaw-env-manager on a workstation or CI runner, install:
 
 - Docker with `docker compose` support
 - Python `3.12+` with `pip`
@@ -255,7 +255,7 @@ python3 -m pip --version
 
 ### Notes
 
-- Open-env assumes a Docker environment with Compose available as
+- OpenClaw-env-manager assumes a Docker environment with Compose available as
   `docker compose`.
 - On Linux, the Python executable is often `python3` rather than `python`.
 - Docker Desktop licensing can require a paid subscription in larger
@@ -264,7 +264,7 @@ python3 -m pip --version
 
 ## V1 Scope
 
-Open-env v1 is intentionally narrow:
+OpenClaw-env-manager v1 is intentionally narrow:
 
 - OpenClaw-first
 - Python-first
@@ -286,7 +286,7 @@ It also accepts exact Node.js requirements only:
 That constraint keeps the lockfile deterministic without shipping a full Python
 dependency resolver in v1.
 
-Open-env can also integrate with Cisco's
+OpenClaw-env-manager can also integrate with Cisco's
 [Skill Scanner](https://github.com/cisco-ai-defense/skill-scanner), which the
 upstream project describes as a best-effort scanner for agent skills with
 static, behavioral, and optional LLM-based analysis.
@@ -368,7 +368,7 @@ The `agent` section supports both inline markdown content and relative `.md`
 file references. For example, `agents_md = "AGENTS.md"` will load
 `AGENTS.md` from the same directory as `openenv.toml`.
 
-Even if they are not declared manually, Open-env normalizes manifests so that
+Even if they are not declared manually, OpenClaw-env-manager normalizes manifests so that
 `deus-context-engine`, `self-improving-agent`, `skill-security-review`,
 `freeride`, and `agent-browser-clawdbot` remain present in the effective skill
 set. `openenv init` writes them explicitly into the starter manifest.
@@ -434,7 +434,7 @@ clawopenenv build
 
 `clawopenenv build` also writes a compose file named after the bot, for example
 `docker-compose-operations-agent.yml`, next to the manifest.
-When `runtime.base_image` is not pinned with `@sha256`, Open-env first checks
+When `runtime.base_image` is not pinned with `@sha256`, OpenClaw-env-manager first checks
 for the image locally and automatically tries `docker image pull <image>` if it
 is missing before failing lock generation.
 
@@ -573,7 +573,7 @@ want to inspect the materialized skill bundle in `.openenv-scan/`.
 Example GitHub Actions step for the exported Dockerfile:
 
 ```yaml
-- name: Build Open-env image with skill scan gate
+- name: Build OpenClaw-env-manager image with skill scan gate
   run: |
     docker build \
       --file Dockerfile \

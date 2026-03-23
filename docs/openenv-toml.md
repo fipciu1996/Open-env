@@ -2,12 +2,12 @@
 
 ## Purpose
 
-`openenv.toml` is the canonical manifest for an Open-env environment. It
+`openenv.toml` is the canonical manifest for an OpenClaw-env-manager environment. It
 describes what should exist in the generated OpenClaw workspace, which runtime
 dependencies should be installed, which skills should be materialized, and how
 the bot should be configured.
 
-Open-env treats this file as the source of truth for:
+OpenClaw-env-manager treats this file as the source of truth for:
 
 - validation
 - lockfile generation
@@ -80,7 +80,7 @@ read_only_root = false
 
 `schema_version` must be set to `1`.
 
-This field allows Open-env to evolve the manifest format over time while still
+This field allows OpenClaw-env-manager to evolve the manifest format over time while still
 supporting explicit compatibility checks.
 
 ## `[project]`
@@ -150,7 +150,7 @@ user_md = "USER.md"
 memory_seed = "memory.md"
 ```
 
-For managed bots, Open-env usually writes:
+For managed bots, OpenClaw-env-manager usually writes:
 
 - `AGENTS.md`
 - `SOUL.md`
@@ -180,7 +180,7 @@ Skills may be:
 - source-backed placeholders
 - discovered later from a running container snapshot
 
-Open-env also normalizes a mandatory baseline so the effective skill set always
+OpenClaw-env-manager also normalizes a mandatory baseline so the effective skill set always
 contains:
 
 - `deus-context-engine`
@@ -243,7 +243,7 @@ In this layout:
 
 ## Validation Rules Worth Remembering
 
-Open-env enforces a few important rules when loading the manifest:
+OpenClaw-env-manager enforces a few important rules when loading the manifest:
 
 - `schema_version` must be supported
 - required top-level sections must exist

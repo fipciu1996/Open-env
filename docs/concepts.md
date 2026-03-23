@@ -22,7 +22,7 @@ That includes:
 
 ## Generated Artifacts
 
-Open-env can render and maintain several build outputs:
+OpenClaw-env-manager can render and maintain several build outputs:
 
 - `Dockerfile`
 - bot-specific `docker-compose-<bot>.yml`
@@ -46,7 +46,7 @@ Managed bots keep:
 
 ## Skill Lifecycle
 
-Skills can come from inline content or source references. Open-env also enforces
+Skills can come from inline content or source references. OpenClaw-env-manager also enforces
 several mandatory skills so that security and operational baselines remain
 present across generated environments.
 

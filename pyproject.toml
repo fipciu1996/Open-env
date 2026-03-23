@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "OpenClaw-env-manager"
 version = "1.1.0"
-description = "Open-env: declarative Dockerized environments for OpenClaw agents"
+description = "OpenClaw-env-manager: declarative Dockerized environments for OpenClaw agents"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
@@ -19,9 +19,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/fipciu1996/Open-env"
-Repository = "https://github.com/fipciu1996/Open-env"
-Issues = "https://github.com/fipciu1996/Open-env/issues"
+Homepage = "https://github.com/fipciu1996/OpenClaw-env-manager"
+Repository = "https://github.com/fipciu1996/OpenClaw-env-manager"
+Issues = "https://github.com/fipciu1996/OpenClaw-env-manager/issues"
 
 [project.scripts]
 clawopenenv = "openenv.cli:main"
@@ -61,4 +61,4 @@ skip_covered = false
 
 [tool.coverage.html]
 directory = "htmlcov"
-title = "Open-env Coverage"
+title = "OpenClaw-env-manager Coverage"
