@@ -1,0 +1,2315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script>
+        const base_url = "None"; /* for search plugin notably */
+    </script>
+    <script>
+    const darkTheme = window.matchMedia("(prefers-color-scheme: dark)");
+    darkTheme.onchange = (e) => {
+        if (e.matches) {
+            document.documentElement.classList.add("dark")
+            localStorage.theme = 'dark';
+        } else {
+            document.documentElement.classList.remove("dark")
+            localStorage.removeItem("theme")
+        }
+    };
+
+    // On page load. Priotiry to lcaolStorage
+    if (localStorage.theme === "dark") {
+        document.documentElement.classList.add("dark")
+    } else if (localStorage.theme === "light") {
+        document.documentElement.classList.remove("dark")
+    } else if (darkTheme.matches) {
+        document.documentElement.classList.add("dark")
+    } else {
+        document.documentElement.classList.remove("dark")
+    }
+
+    // set the layout based on localStorage
+    document.documentElement.classList.add(localStorage.getItem("html-layout") || "layout-fixed");
+</script>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+
+
+<title>Docker</title>
+
+
+
+
+
+
+
+
+
+
+<!-- Open Graph (Facebook, LinkedIn) -->
+
+<meta property="og:title" content="Docker">
+
+
+
+
+
+
+
+
+
+
+<!-- Twitter Card -->
+
+<meta name="twitter:title" content="Docker">
+
+
+
+
+
+
+<!-- JSON-LD Structured Data -->
+
+
+
+    <link rel="icon" href="../../img/favicon.ico">
+
+    <link href="../../css/base.css" rel="stylesheet">
+    <link href="../../css/geist.css" rel="stylesheet">
+
+    
+    <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+
+    
+
+    <script src="../../js/callbacks.js"></script>
+
+    
+
+    
+
+    
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("a.headerlink").forEach(function (link) {
+            link.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                // Build the full URL with the anchor fragment
+                const url = window.location.origin + window.location.pathname + this.getAttribute("href");
+
+                navigator.clipboard.writeText(url).then(function () {
+                    // Optional: brief visual feedback
+                });
+            });
+        });
+    });
+</script>
+    
+
+</head>
+
+<body
+    class="text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)] theme-default">
+    <div id="inner-body" class="bg-background relative z-10 flex min-h-svh flex-col">
+        <header class="bg-background sticky top-0 z-50 w-full" view-transition-name="header">
+    <div class="container-wrapper 3xl:fixed:px-0 px-6">
+        <div class="3xl:fixed:container flex h-(--header-height) items-center gap-2 **:data-[slot=separator]:!h-4">
+            <button id="menu-button" data-slot="popover-trigger" onclick="onMobileMenuButtonClick(event)"
+                class="group whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:text-accent-foreground px-4 py-2 has-[&gt;svg]:px-3 extend-touch-target h-8 touch-manipulation items-center justify-start gap-2.5 !p-0 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 active:bg-transparent dark:hover:bg-transparent flex lg:hidden"
+                type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-«Rmplb»"
+                data-state="closed">
+                <div class="relative flex h-8 w-4 items-center justify-center">
+                    <div class="relative size-4">
+                        <!-- 16px x 16px -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="0" x2="16" y1="5" y2="5"
+                                class="group-data-[state=open]:translate-y-[2.25px] group-data-[state=open]:-translate-x-[2.25px] group-data-[state=open]:rotate-45 transition-all duration-300 origin-center" />
+                            <line x1="0" x2="16" y1="11" y2="11"
+                                class="group-data-[state=open]:-translate-y-[2.25px] group-data-[state=open]:-translate-x-[2.25px] group-data-[state=open]:-rotate-45 transition-all duration-300 origin-center" />
+                        </svg>
+                    </div>
+
+                    <span class="sr-only">Toggle Menu</span>
+                </div>
+                <span class="flex h-8 items-center text-lg leading-none font-medium">Menu</span>
+            </button>
+            <a data-slot="button"
+                class="items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-5 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 hidden h-8 lg:flex"
+                href="None">
+                <span class="size-8 flex flex-row justify-center items-center">
+                    
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"
+    class="size-5">
+    <rect width="256" height="256" fill="none"></rect>
+    <line x1="208" y1="128" x2="128" y2="208" fill="none" stroke="currentColor" stroke-linecap="round"
+        stroke-linejoin="round" stroke-width="32"></line>
+    <line x1="192" y1="40" x2="40" y2="192" fill="none" stroke="currentColor" stroke-linecap="round"
+        stroke-linejoin="round" stroke-width="32"></line>
+</svg>
+
+
+                </span>
+
+                
+                <h1 class="pr-2">OpenClaw-env-manager</h1>
+                
+            </a>
+            
+            <div class="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
+                <div class="hidden w-full flex-1 md:flex md:w-auto md:flex-none">
+                    <div class="hidden w-full flex-1 md:flex md:w-auto md:flex-none">
+    <button onclick="onSearchBarClick(event)" data-slot="dialog-trigger" data-variant="outline" data-size="default" class="inline-flex shrink-0 items-center gap-2 text-sm whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 border bg-background hover:text-accent-foreground dark:border-input dark:hover:bg-input/50 px-4 py-2 has-[&gt;svg]:px-3 relative h-8 w-full justify-start rounded-lg pl-3 font-normal text-foreground shadow-none hover:bg-muted/50 sm:pr-12 md:w-48 lg:w-56 xl:w-64 dark:bg-card" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_r_1_" data-state="closed">
+        <span class="hidden lg:inline-flex">Search documentation...</span>
+        <span class="inline-flex lg:hidden">Search...</span>
+    </button>
+</div>
+<dialog id="search-dialog" onclick="onSearchDialogClick(event)"
+    class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background rounded-lg shadow-lg border overflow-hidden p-0">
+    <div class="w-lg gap-4">
+        <div class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground">
+            <div data-slot="command-input-wrapper" class="flex h-9 items-center gap-2 border-b px-3"><svg
+                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-search size-4 shrink-0 opacity-50">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <input data-slot="command-input"
+                    class="placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Search documentation..." cmdk-input="" autocomplete="off" autocorrect="off"
+                    spellcheck="false" aria-autocomplete="list" role="combobox" aria-expanded="true"
+                    aria-controls="radix-«r1t6»" aria-labelledby="radix-«r1t7»" id="radix-«r1t8»" type="text" value=""
+                    aria-activedescendant="radix-«r1th»" oninput="onInputHandler(event)">
+            </div>
+        </div>
+        <div id="mkdocs-search-results">
+            <!-- search results go there -->
+        </div>
+    </div>
+</dialog>
+<script>
+    document.removeEventListener("keydown", searchShortcutHandler);
+    document.addEventListener("keydown", searchShortcutHandler);
+</script>
+                </div>
+                
+                <div data-orientation="vertical" role="none" data-slot="separator"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px ml-2 hidden lg:block">
+                </div>
+                <a target="_blank" rel="noreferrer" data-slot="button"
+                    class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 h-8 shadow-none"
+                    href="https://github.com/fipciu1996/OpenClaw-env-manager">
+                    <svg viewBox="0 0 438.549 438.549">
+                        <path fill="currentColor"
+                            d="M409.132 114.573c-19.608-33.596-46.205-60.194-79.798-79.8-33.598-19.607-70.277-29.408-110.063-29.408-39.781 0-76.472 9.804-110.063 29.408-33.596 19.605-60.192 46.204-79.8 79.8C9.803 148.168 0 184.854 0 224.63c0 47.78 13.94 90.745 41.827 128.906 27.884 38.164 63.906 64.572 108.063 79.227 5.14.954 8.945.283 11.419-1.996 2.475-2.282 3.711-5.14 3.711-8.562 0-.571-.049-5.708-.144-15.417a2549.81 2549.81 0 01-.144-25.406l-6.567 1.136c-4.187.767-9.469 1.092-15.846 1-6.374-.089-12.991-.757-19.842-1.999-6.854-1.231-13.229-4.086-19.13-8.559-5.898-4.473-10.085-10.328-12.56-17.556l-2.855-6.57c-1.903-4.374-4.899-9.233-8.992-14.559-4.093-5.331-8.232-8.945-12.419-10.848l-1.999-1.431c-1.332-.951-2.568-2.098-3.711-3.429-1.142-1.331-1.997-2.663-2.568-3.997-.572-1.335-.098-2.43 1.427-3.289 1.525-.859 4.281-1.276 8.28-1.276l5.708.853c3.807.763 8.516 3.042 14.133 6.851 5.614 3.806 10.229 8.754 13.846 14.842 4.38 7.806 9.657 13.754 15.846 17.847 6.184 4.093 12.419 6.136 18.699 6.136 6.28 0 11.704-.476 16.274-1.423 4.565-.952 8.848-2.383 12.847-4.285 1.713-12.758 6.377-22.559 13.988-29.41-10.848-1.14-20.601-2.857-29.264-5.14-8.658-2.286-17.605-5.996-26.835-11.14-9.235-5.137-16.896-11.516-22.985-19.126-6.09-7.614-11.088-17.61-14.987-29.979-3.901-12.374-5.852-26.648-5.852-42.826 0-23.035 7.52-42.637 22.557-58.817-7.044-17.318-6.379-36.732 1.997-58.24 5.52-1.715 13.706-.428 24.554 3.853 10.85 4.283 18.794 7.952 23.84 10.994 5.046 3.041 9.089 5.618 12.135 7.708 17.705-4.947 35.976-7.421 54.818-7.421s37.117 2.474 54.823 7.421l10.849-6.849c7.419-4.57 16.18-8.758 26.262-12.565 10.088-3.805 17.802-4.853 23.134-3.138 8.562 21.509 9.325 40.922 2.279 58.24 15.036 16.18 22.559 35.787 22.559 58.817 0 16.178-1.958 30.497-5.853 42.966-3.9 12.471-8.941 22.457-15.125 29.979-6.191 7.521-13.901 13.85-23.131 18.986-9.232 5.14-18.182 8.85-26.84 11.136-8.662 2.286-18.415 4.004-29.263 5.146 9.894 8.562 14.842 22.077 14.842 40.539v60.237c0 3.422 1.19 6.279 3.572 8.562 2.379 2.279 6.136 2.95 11.276 1.995 44.163-14.653 80.185-41.062 108.068-79.226 27.88-38.161 41.825-81.126 41.825-128.906-.01-39.771-9.818-76.454-29.414-110.049z">
+                        </path>
+                    </svg>
+                    
+                    <span id="stargazers" class="text-muted-foreground w-8 text-xs tabular-nums" onload="test()">
+                    </span>
+                    
+                </a>
+                
+                <div data-orientation="vertical" role="none" data-slot="separator"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px 3xl:flex hidden">
+                </div>
+                <button data-slot="button"
+                    class="items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-8 3xl:flex hidden"
+                    title="Toggle layout" onclick="toggleLayout(event)">
+                    <span class="sr-only">Toggle layout</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-gallery-horizontal">
+                        <path d="M2 3v18"></path>
+                        <rect width="12" height="18" x="6" y="3" rx="2"></rect>
+                        <path d="M22 3v18"></path>
+                    </svg>
+                </button>
+                <div data-orientation="vertical" role="none" data-slot="separator"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px">
+                </div>
+                <button data-slot="button"
+                    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 group/toggle extend-touch-target size-8"
+                    title="Toggle theme" onclick="onThemeSwitch(event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="size-4.5">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                        <path d="M12 3l0 18"></path>
+                        <path d="M12 9l4.65 -4.65"></path>
+                        <path d="M12 14.3l7.37 -7.37"></path>
+                        <path d="M12 19.6l8.85 -8.85"></path>
+                    </svg>
+                    <span class="sr-only">Toggle theme</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+        <main class="flex flex-1 flex-col">
+            <div class="container-wrapper flex flex-1 flex-col px-2">
+                <div data-slot="sidebar-wrapper"
+                    style="--sidebar-width:calc(var(--spacing) * 72);--sidebar-width-icon:3rem;"
+                    class="group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex w-full 3xl:fixed:container 3xl:fixed:px-3 min-h-min flex-1 items-start px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:240px] lg:[--top-spacing:calc(var(--spacing)*4)]">
+                    <div data-slot="sidebar"
+                        class="w-(--sidebar-width) flex-col text-sidebar-foreground sticky top-[calc(var(--header-height)+0.6rem)] z-30 hidden h-[calc(100svh-10rem)] overscroll-none bg-transparent [--sidebar-menu-width:--spacing(56)] lg:flex">
+                        <div class="h-9"></div>
+                        <div
+                            class="absolute top-8 z-10 h-8 w-(--sidebar-menu-width) shrink-0 bg-gradient-to-b from-background via-background/80 to-background/50 blur-xs">
+                        </div>
+                        <div
+                            class="absolute top-12 right-2 bottom-0 hidden h-full w-px bg-gradient-to-b from-transparent via-border to-transparent lg:flex">
+                        </div>
+                        <div data-slot="sidebar-content" data-sidebar="content" view-transition-name="sidebar"
+                            class="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden mx-auto no-scrollbar w-(--sidebar-menu-width) overflow-x-hidden px-2">
+                            
+
+
+
+
+
+
+
+
+
+
+
+<div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col p-2 pt-6">
+    <div data-slot="sidebar-group-content" data-sidebar="group-content" class="w-full text-sm">
+        <ul data-slot="sidebar-menu" data-sidebar="menu" class="flex w-full min-w-0 flex-col gap-0.5">
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Overview
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Getting Started
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Concepts
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Security Notes
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        openclawenv.toml Structure
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Changelog
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+<div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col p-2">
+    <div data-slot="sidebar-group-label" data-sidebar="group-label"
+        class="flex h-8 shrink-0 items-center rounded-md px-2 text-xs ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0 group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 font-medium text-muted-foreground">
+        API</div>
+    <div data-slot="sidebar-group-content" data-sidebar="group-content" class="w-full text-sm">
+        <ul data-slot="sidebar-menu" data-sidebar="menu" class="flex w-full min-w-0 flex-col gap-0.5">
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Overview
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        CLI
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Manifests
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="true" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Docker
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Bots
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Integrations
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Env Files
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Core
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Templates
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+<div class="sticky -bottom-1 z-10 h-16 shrink-0 bg-gradient-to-t from-background via-background/80 to-background/50 blur-xs"></div>
+                        </div>
+                    </div>
+                    <div class="h-full w-full">
+                        <div data-slot="docs" class="flex items-stretch text-[1.05rem] sm:text-[15px] xl:w-full">
+                            <div class="flex min-w-0 flex-1 flex-col">
+                                <div class="h-(--top-spacing) shrink-0"></div>
+                                <article class="w-full" view-transition-name="page">
+  <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2">
+      <div id="page-header" class="flex items-start justify-between">
+        <h1 class="scroll-m-20 text-4xl font-semibold tracking-tight sm:text-3xl xl:text-4xl">
+          Docker
+        </h1>
+
+        <div class="flex items-center gap-2 pt-1.5">
+          
+<button onclick="fetch(`/api/docker.md`).then((r) => r.blob()).then((blob) => navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })]))" 
+        data-slot="button" 
+        class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md gap-1.5 px-3 has-[&>svg]:px-2.5 h-8 shadow-none md:h-7 md:text-[0.8rem]">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-copy ">
+    <path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z"></path><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1"></path>
+</svg>
+<span class="max-md:hidden">Copy Page</span>
+</button>
+          
+          <a data-slot="button" id="previous-button"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-secondary text-secondary-foreground hover:bg-secondary/80 extend-touch-target size-8 shadow-none md:size-7"
+            href="None">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="tabler-icon tabler-icon-arrow-left">
+              <path d="M5 12l14 0"></path>
+              <path d="M5 12l6 6"></path>
+              <path d="M5 12l6 -6"></path>
+            </svg>
+            <span class="sr-only">Previous</span>
+          </a>
+          
+          
+          <a data-slot="button" id="next-button"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-secondary text-secondary-foreground hover:bg-secondary/80 extend-touch-target size-8 shadow-none md:size-7"
+            href="None">
+            <span class="sr-only">Next</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="tabler-icon tabler-icon-arrow-right">
+              <path d="M5 12l14 0"></path>
+              <path d="M13 18l6 -6"></path>
+              <path d="M13 6l6 6"></path>
+            </svg>
+          </a>
+          
+        </div>
+      </div>
+      
+    </div>
+    <div class="flex justify-end items-center">
+       
+    </div>
+  </div>
+  <div class="typography w-full flex-1 *:data-[slot=alert]:first:mt-0">
+    <p>The Docker layer is responsible for producing buildable and runnable artifacts
+for OpenClaw environments.</p>
+<h2 id="openenvdocker"><code>openenv.docker</code><a class="headerlink" href="#openenvdocker" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="openenv.docker" class="doc doc-heading">
+            <code>openenv.docker</code>
+
+
+<a href="#openenv.docker" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Docker image and compose generation helpers.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="openenvdockerdockerfile"><code>openenv.docker.dockerfile</code><a class="headerlink" href="#openenvdockerdockerfile" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="openenv.docker.dockerfile" class="doc doc-heading">
+            <code>openenv.docker.dockerfile</code>
+
+
+<a href="#openenv.docker.dockerfile" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Dockerfile generation for OpenClawenv.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.dockerfile.render_dockerfile" class="doc doc-heading">
+            <code class="highlight language-python">render_dockerfile(manifest, lockfile, *, raw_manifest_text, raw_lock_text)</code>
+
+<a href="#openenv.docker.dockerfile.render_dockerfile" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Render a standalone Dockerfile from a manifest and lockfile.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/dockerfile.py</code></summary>
+              <pre class="highlight"><code class="language-python">def render_dockerfile(
+    manifest: Manifest,
+    lockfile: Lockfile,
+    *,
+    raw_manifest_text: str,
+    raw_lock_text: str,
+) -&gt; str:
+    """Render a standalone Dockerfile from a manifest and lockfile."""
+    sandbox_reference = lockfile.base_image["resolved_reference"]
+    payload = _render_payload(
+        manifest,
+        raw_manifest_text=raw_manifest_text,
+        raw_lock_text=raw_lock_text,
+        base_reference=sandbox_reference,
+    )
+    payload_b64 = encode_payload(payload)
+    lines: list[str] = [
+        "# syntax=docker/dockerfile:1",
+        f"FROM {OPENCLAW_GATEWAY_RUNTIME_IMAGE}",
+        f'LABEL org.opencontainers.image.title="{_escape_label(manifest.project.name)}"',
+        f'LABEL org.opencontainers.image.version="{_escape_label(manifest.project.version)}"',
+        f'LABEL io.openclawenv.manifest-hash="{lockfile.manifest_hash}"',
+        f'LABEL io.openclawenv.sandbox-image="{_escape_label(sandbox_reference)}"',
+        "ENV PYTHONDONTWRITEBYTECODE=1",
+        "USER root",
+    ]
+    for key, value in sorted(manifest.runtime.env.items()):
+        lines.append(f"ENV {key}={json.dumps(value)}")
+    lines.extend(_package_install_lines(manifest.runtime.system_packages))
+    lines.extend(_python_binary_link_lines())
+    lines.extend(_python_venv_lines())
+    lines.append(
+        "RUN if ! command -v npx &gt;/dev/null 2&gt;&amp;1; then "
+        "printf '%s\\n' '#!/bin/sh' 'exec npm exec --yes -- \"$@\"' "
+        "&gt; /usr/local/bin/npx &amp;&amp; chmod +x /usr/local/bin/npx; fi"
+    )
+    requirements = [
+        SKILL_SCANNER_REQUIREMENT,
+        *(_python_package_argument(package) for package in lockfile.python_packages),
+    ]
+    lines.append(
+        "RUN python -m pip install --no-cache-dir " + " ".join(requirements)
+    )
+    node_requirements = _global_node_requirements(lockfile)
+    if node_requirements:
+        lines.append(
+            "RUN npm install --global --no-fund --no-update-notifier "
+            + " ".join(node_requirements)
+        )
+        lines.append("RUN agent-browser install")
+    lines.extend(_state_link_lines(manifest))
+    lines.append("RUN mkdir -p /opt/openclawenv")
+    lines.append(
+        'RUN ["python", "-c", '
+        f'{json.dumps(_payload_writer_script(payload_b64))}'
+        "]"
+    )
+    lines.extend(_freeride_install_lines(manifest))
+    lines.extend(_skill_scan_lines(manifest))
+    lines.extend(_runtime_permission_lines(manifest))
+    lines.append(f"USER {DEFAULT_OPENCLAW_RUNTIME_USER}")
+    return "\n".join(lines) + "\n"</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="openenvdockercompose"><code>openenv.docker.compose</code><a class="headerlink" href="#openenvdockercompose" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="openenv.docker.compose" class="doc doc-heading">
+            <code>openenv.docker.compose</code>
+
+
+<a href="#openenv.docker.compose" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>docker-compose generation for OpenClawenv.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="openenv.docker.compose.AllBotsComposeSpec" class="doc doc-heading">
+            <code>AllBotsComposeSpec</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#openenv.docker.compose.AllBotsComposeSpec" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Information needed to render one bot entry inside the shared compose stack.</p>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src/openenv/docker/compose.py</code></summary>
+                <pre class="highlight"><code class="language-python">@dataclass(slots=True, frozen=True)
+class AllBotsComposeSpec:
+    """Information needed to render one bot entry inside the shared compose stack."""
+
+    slug: str
+    manifest: Manifest
+    image_tag: str</code></pre>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.compose.all_bots_compose_filename" class="doc doc-heading">
+            <code class="highlight language-python">all_bots_compose_filename()</code>
+
+<a href="#openenv.docker.compose.all_bots_compose_filename" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the shared compose filename for all managed bots.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/compose.py</code></summary>
+              <pre class="highlight"><code class="language-python">def all_bots_compose_filename() -&gt; str:
+    """Return the shared compose filename for all managed bots."""
+    return ALL_BOTS_COMPOSE_FILENAME</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.compose.cli_container_name" class="doc doc-heading">
+            <code class="highlight language-python">cli_container_name(agent_name)</code>
+
+<a href="#openenv.docker.compose.cli_container_name" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the CLI container name for a bot.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/compose.py</code></summary>
+              <pre class="highlight"><code class="language-python">def cli_container_name(agent_name: str) -&gt; str:
+    """Return the CLI container name for a bot."""
+    return f"{slugify_name(agent_name)}-openclaw-cli"</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.compose.default_compose_filename" class="doc doc-heading">
+            <code class="highlight language-python">default_compose_filename(agent_name)</code>
+
+<a href="#openenv.docker.compose.default_compose_filename" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the default compose filename for a bot.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/compose.py</code></summary>
+              <pre class="highlight"><code class="language-python">def default_compose_filename(agent_name: str) -&gt; str:
+    """Return the default compose filename for a bot."""
+    return f"docker-compose-{slugify_name(agent_name)}.yml"</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.compose.default_env_filename" class="doc doc-heading">
+            <code class="highlight language-python">default_env_filename(agent_name)</code>
+
+<a href="#openenv.docker.compose.default_env_filename" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the default env filename for a bot.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/compose.py</code></summary>
+              <pre class="highlight"><code class="language-python">def default_env_filename(agent_name: str) -&gt; str:
+    """Return the default env filename for a bot."""
+    return f".{slugify_name(agent_name)}.env"</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.compose.gateway_container_name" class="doc doc-heading">
+            <code class="highlight language-python">gateway_container_name(agent_name)</code>
+
+<a href="#openenv.docker.compose.gateway_container_name" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the gateway container name for a bot.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/compose.py</code></summary>
+              <pre class="highlight"><code class="language-python">def gateway_container_name(agent_name: str) -&gt; str:
+    """Return the gateway container name for a bot."""
+    return f"{slugify_name(agent_name)}-openclaw-gateway"</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.compose.render_all_bots_compose" class="doc doc-heading">
+            <code class="highlight language-python">render_all_bots_compose(specs)</code>
+
+<a href="#openenv.docker.compose.render_all_bots_compose" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Render a shared stack with one gateway and CLI services for all bots.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/compose.py</code></summary>
+              <pre class="highlight"><code class="language-python">def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -&gt; str:
+    """Render a shared stack with one gateway and CLI services for all bots."""
+    if not specs:
+        raise ValueError("At least one bot is required to render the shared compose stack.")
+    lines = [
+        "services:",
+        f"  {ALL_BOTS_GATEWAY_SERVICE}:",
+        f'    image: {_quoted("${OPENCLAW_GATEWAY_IMAGE:-alpine/openclaw:main}")}',
+        f"    container_name: {_quoted(ALL_BOTS_GATEWAY_CONTAINER)}",
+        "    environment:",
+    ]
+    lines.extend(_render_environment(_shared_gateway_environment()))
+    lines.extend(
+        [
+            "    cap_drop:",
+            "      - ALL",
+            "    security_opt:",
+            "      - no-new-privileges:true",
+            "    read_only: true",
+            "    tmpfs:",
+            f'      - "${{OPENCLAW_TMPFS:-{DEFAULT_OPENCLAW_TMPFS}}}"',
+            f'    pids_limit: "${{OPENCLAW_PIDS_LIMIT:-{DEFAULT_OPENCLAW_PIDS_LIMIT}}}"',
+            "    ulimits:",
+            "      nofile:",
+            f'        soft: "${{OPENCLAW_NOFILE_SOFT:-{DEFAULT_OPENCLAW_NOFILE_SOFT}}}"',
+            f'        hard: "${{OPENCLAW_NOFILE_HARD:-{DEFAULT_OPENCLAW_NOFILE_HARD}}}"',
+            f'      nproc: "${{OPENCLAW_NPROC:-{DEFAULT_OPENCLAW_NPROC}}}"',
+            "    volumes:",
+            (
+                f'      - "{ALL_BOTS_GATEWAY_CONFIG_DIR}:'
+                f'{DEFAULT_OPENCLAW_HOME}/.openclaw"'
+            ),
+            (
+                f'      - "{ALL_BOTS_GATEWAY_WORKSPACE_DIR}:'
+                f'{DEFAULT_OPENCLAW_HOME}/.openclaw/workspace"'
+            ),
+            "    ports:",
+            (
+                f'      - "${{OPENCLAW_GATEWAY_HOST_BIND:-{DEFAULT_OPENCLAW_GATEWAY_HOST_BIND}}}'
+                f':${{OPENCLAW_GATEWAY_PORT:-{DEFAULT_OPENCLAW_GATEWAY_PORT}}}:18789"'
+            ),
+            (
+                f'      - "${{OPENCLAW_BRIDGE_HOST_BIND:-{DEFAULT_OPENCLAW_BRIDGE_HOST_BIND}}}'
+                f':${{OPENCLAW_BRIDGE_PORT:-{DEFAULT_OPENCLAW_BRIDGE_PORT}}}:18790"'
+            ),
+            "    init: true",
+            "    restart: unless-stopped",
+            "    command:",
+            "      [",
+            '        "node",',
+            '        "dist/index.js",',
+            '        "gateway",',
+            '        "--bind",',
+            f'        "${{OPENCLAW_GATEWAY_BIND:-{DEFAULT_OPENCLAW_GATEWAY_BIND}}}",',
+            '        "--port",',
+            '        "18789",',
+            "      ]",
+            "    healthcheck:",
+            "      test:",
+            "        [",
+            '          "CMD",',
+            '          "node",',
+            '          "-e",',
+            '          "fetch(\'http://127.0.0.1:18789/healthz\').then((r)=&gt;process.exit(r.ok?0:1)).catch(()=&gt;process.exit(1))",',
+            "        ]",
+            "      interval: 30s",
+            "      timeout: 5s",
+            "      retries: 5",
+            "      start_period: 20s",
+        ]
+    )
+    for spec in specs:
+        service_name = _all_bots_cli_service_name(spec.slug)
+        container_name = _all_bots_cli_container_name(spec.slug)
+        env_file = f"./{spec.slug}/{default_env_filename(spec.manifest.openclaw.agent_name)}"
+        config_mount = f"./{spec.slug}/.openclaw:{DEFAULT_OPENCLAW_HOME}/.openclaw"
+        workspace_mount = (
+            f"./{spec.slug}/workspace:{DEFAULT_OPENCLAW_HOME}/.openclaw/workspace"
+        )
+        cli_env = dict(_base_service_environment(spec.manifest))
+        cli_env["BROWSER"] = "echo"
+        lines.extend(
+            [
+                "",
+                f"  {service_name}:",
+                f"    image: {_quoted(spec.image_tag)}",
+                "    build:",
+                f'      context: {_quoted(f"./{spec.slug}")}',
+                f"      dockerfile: {_quoted(DEFAULT_DOCKERFILE_NAME)}",
+                f"    container_name: {_quoted(container_name)}",
+                '    network_mode: "service:openclaw-gateway"',
+                "    cap_drop:",
+                "      - ALL",
+                "    security_opt:",
+                "      - no-new-privileges:true",
+                "    read_only: true",
+                "    tmpfs:",
+                f'      - "${{OPENCLAW_TMPFS:-{DEFAULT_OPENCLAW_TMPFS}}}"',
+                f'    pids_limit: "${{OPENCLAW_PIDS_LIMIT:-{DEFAULT_OPENCLAW_PIDS_LIMIT}}}"',
+                "    ulimits:",
+                "      nofile:",
+                f'        soft: "${{OPENCLAW_NOFILE_SOFT:-{DEFAULT_OPENCLAW_NOFILE_SOFT}}}"',
+                f'        hard: "${{OPENCLAW_NOFILE_HARD:-{DEFAULT_OPENCLAW_NOFILE_HARD}}}"',
+                f'      nproc: "${{OPENCLAW_NPROC:-{DEFAULT_OPENCLAW_NPROC}}}"',
+                "    env_file:",
+                f"      - {_quoted(env_file)}",
+                "    environment:",
+            ]
+        )
+        lines.extend(_render_environment(cli_env))
+        lines.extend(
+            [
+                "    volumes:",
+                f"      - {_quoted(config_mount)}",
+                f"      - {_quoted(workspace_mount)}",
+                "    stdin_open: true",
+                "    tty: true",
+                "    init: true",
+                '    entrypoint: ["node", "dist/index.js"]',
+                "    depends_on:",
+                f"      - {ALL_BOTS_GATEWAY_SERVICE}",
+            ]
+        )
+    return "\n".join(lines) + "\n"</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.compose.render_compose" class="doc doc-heading">
+            <code class="highlight language-python">render_compose(manifest, image_tag)</code>
+
+<a href="#openenv.docker.compose.render_compose" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Render an OpenClaw-style docker-compose file for the bot image.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/compose.py</code></summary>
+              <pre class="highlight"><code class="language-python">def render_compose(manifest: Manifest, image_tag: str) -&gt; str:
+    """Render an OpenClaw-style docker-compose file for the bot image."""
+    env_file = default_env_filename(manifest.openclaw.agent_name)
+    gateway_name = gateway_container_name(manifest.openclaw.agent_name)
+    cli_name = cli_container_name(manifest.openclaw.agent_name)
+    image_ref = f"${{OPENCLAW_IMAGE:-{image_tag}}}"
+    config_mount = (
+        f"${{OPENCLAW_CONFIG_DIR:-{DEFAULT_OPENCLAW_CONFIG_DIR}}}:{DEFAULT_OPENCLAW_HOME}/.openclaw"
+    )
+    workspace_mount = (
+        f"${{OPENCLAW_WORKSPACE_DIR:-{DEFAULT_OPENCLAW_WORKSPACE_DIR}}}:"
+        f"{DEFAULT_OPENCLAW_HOME}/.openclaw/workspace"
+    )
+    gateway_env = _base_service_environment(manifest)
+    cli_env = dict(gateway_env)
+    cli_env["BROWSER"] = "echo"
+
+    lines = [
+        "services:",
+        f"  {OPENCLAW_GATEWAY_SERVICE}:",
+        f"    image: {_quoted(image_ref)}",
+        "    build:",
+        f"      context: {_quoted(DEFAULT_BUILD_CONTEXT)}",
+        f"      dockerfile: {_quoted(DEFAULT_DOCKERFILE_NAME)}",
+        f"    container_name: {_quoted(gateway_name)}",
+        "    env_file:",
+        f"      - {_quoted(env_file)}",
+        "    environment:",
+    ]
+    lines.extend(_render_environment(gateway_env))
+    lines.extend(
+        [
+            "    cap_drop:",
+            "      - ALL",
+            "    security_opt:",
+            "      - no-new-privileges:true",
+            "    read_only: true",
+            "    tmpfs:",
+            f'      - "${{OPENCLAW_TMPFS:-{DEFAULT_OPENCLAW_TMPFS}}}"',
+            f'    pids_limit: "${{OPENCLAW_PIDS_LIMIT:-{DEFAULT_OPENCLAW_PIDS_LIMIT}}}"',
+            "    ulimits:",
+            "      nofile:",
+            f'        soft: "${{OPENCLAW_NOFILE_SOFT:-{DEFAULT_OPENCLAW_NOFILE_SOFT}}}"',
+            f'        hard: "${{OPENCLAW_NOFILE_HARD:-{DEFAULT_OPENCLAW_NOFILE_HARD}}}"',
+            f'      nproc: "${{OPENCLAW_NPROC:-{DEFAULT_OPENCLAW_NPROC}}}"',
+            "    volumes:",
+            f"      - {_quoted(config_mount)}",
+            f"      - {_quoted(workspace_mount)}",
+            "      ## Uncomment the lines below to enable sandbox isolation",
+            "      ## (agents.defaults.sandbox). Requires Docker CLI in the image",
+            "      ## (build with --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1) or use",
+            "      ## scripts/docker/setup.sh with OPENCLAW_SANDBOX=1 for automated setup.",
+            "      ## WARNING: mounting /var/run/docker.sock grants host root-equivalent access.",
+            "      ## Set DOCKER_GID to the host docker group GID before enabling it.",
+            '      # - "/var/run/docker.sock:/var/run/docker.sock"',
+            "    # group_add:",
+            '    #   - "${DOCKER_GID:-999}"',
+            "    ports:",
+            (
+                f'      - "${{OPENCLAW_GATEWAY_HOST_BIND:-{DEFAULT_OPENCLAW_GATEWAY_HOST_BIND}}}'
+                f':${{OPENCLAW_GATEWAY_PORT:-{DEFAULT_OPENCLAW_GATEWAY_PORT}}}:18789"'
+            ),
+            (
+                f'      - "${{OPENCLAW_BRIDGE_HOST_BIND:-{DEFAULT_OPENCLAW_BRIDGE_HOST_BIND}}}'
+                f':${{OPENCLAW_BRIDGE_PORT:-{DEFAULT_OPENCLAW_BRIDGE_PORT}}}:18790"'
+            ),
+            "    init: true",
+            "    restart: unless-stopped",
+            "    command:",
+            "      [",
+            '        "node",',
+            '        "dist/index.js",',
+            '        "gateway",',
+            '        "--bind",',
+            f'        "${{OPENCLAW_GATEWAY_BIND:-{DEFAULT_OPENCLAW_GATEWAY_BIND}}}",',
+            '        "--port",',
+            '        "18789",',
+            "      ]",
+            "    healthcheck:",
+            "      test:",
+            "        [",
+            '          "CMD",',
+            '          "node",',
+            '          "-e",',
+            '          "fetch(\'http://127.0.0.1:18789/healthz\').then((r)=&gt;process.exit(r.ok?0:1)).catch(()=&gt;process.exit(1))",',
+            "        ]",
+            "      interval: 30s",
+            "      timeout: 5s",
+            "      retries: 5",
+            "      start_period: 20s",
+            "",
+            f"  {OPENCLAW_CLI_SERVICE}:",
+            f"    image: {_quoted(image_ref)}",
+            f"    container_name: {_quoted(cli_name)}",
+            '    network_mode: "service:openclaw-gateway"',
+            "    cap_drop:",
+            "      - ALL",
+            "    security_opt:",
+            "      - no-new-privileges:true",
+            "    read_only: true",
+            "    tmpfs:",
+            f'      - "${{OPENCLAW_TMPFS:-{DEFAULT_OPENCLAW_TMPFS}}}"',
+            f'    pids_limit: "${{OPENCLAW_PIDS_LIMIT:-{DEFAULT_OPENCLAW_PIDS_LIMIT}}}"',
+            "    ulimits:",
+            "      nofile:",
+            f'        soft: "${{OPENCLAW_NOFILE_SOFT:-{DEFAULT_OPENCLAW_NOFILE_SOFT}}}"',
+            f'        hard: "${{OPENCLAW_NOFILE_HARD:-{DEFAULT_OPENCLAW_NOFILE_HARD}}}"',
+            f'      nproc: "${{OPENCLAW_NPROC:-{DEFAULT_OPENCLAW_NPROC}}}"',
+            "    env_file:",
+            f"      - {_quoted(env_file)}",
+            "    environment:",
+        ]
+    )
+    lines.extend(_render_environment(cli_env))
+    lines.extend(
+        [
+            "    volumes:",
+            f"      - {_quoted(config_mount)}",
+            f"      - {_quoted(workspace_mount)}",
+            "    stdin_open: true",
+            "    tty: true",
+            "    init: true",
+            '    entrypoint: ["node", "dist/index.js"]',
+            "    depends_on:",
+            f"      - {OPENCLAW_GATEWAY_SERVICE}",
+        ]
+    )
+    return "\n".join(lines) + "\n"</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.compose.render_env_file" class="doc doc-heading">
+            <code class="highlight language-python">render_env_file(manifest, image_tag, *, existing_values=None)</code>
+
+<a href="#openenv.docker.compose.render_env_file" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Render the bot-specific env file with OpenClaw defaults and secrets.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/compose.py</code></summary>
+              <pre class="highlight"><code class="language-python">def render_env_file(
+    manifest: Manifest,
+    image_tag: str,
+    *,
+    existing_values: dict[str, str] | None = None,
+) -&gt; str:
+    """Render the bot-specific env file with OpenClaw defaults and secrets."""
+    values = dict(existing_values or {})
+    secret_names = [secret.name for secret in manifest.runtime.secret_refs]
+    used_keys: set[str] = set()
+    lines = [
+        f"# OpenClaw runtime and secrets for {manifest.openclaw.agent_name}",
+        (
+            "# Use with: docker compose --env-file "
+            f"{default_env_filename(manifest.openclaw.agent_name)} -f "
+            f"{default_compose_filename(manifest.openclaw.agent_name)} up -d"
+        ),
+        "",
+        "# OpenClaw runtime overrides",
+        "# docker compose builds and tags this image from the adjacent Dockerfile",
+    ]
+    runtime_defaults = {
+        "OPENCLAW_IMAGE": image_tag,
+        "OPENCLAW_CONFIG_DIR": DEFAULT_OPENCLAW_CONFIG_DIR,
+        "OPENCLAW_WORKSPACE_DIR": DEFAULT_OPENCLAW_WORKSPACE_DIR,
+        "OPENCLAW_GATEWAY_HOST_BIND": DEFAULT_OPENCLAW_GATEWAY_HOST_BIND,
+        "OPENCLAW_BRIDGE_HOST_BIND": DEFAULT_OPENCLAW_BRIDGE_HOST_BIND,
+        "OPENCLAW_GATEWAY_PORT": DEFAULT_OPENCLAW_GATEWAY_PORT,
+        "OPENCLAW_BRIDGE_PORT": DEFAULT_OPENCLAW_BRIDGE_PORT,
+        "OPENCLAW_GATEWAY_BIND": DEFAULT_OPENCLAW_GATEWAY_BIND,
+        "OPENCLAW_TMPFS": DEFAULT_OPENCLAW_TMPFS,
+        "OPENCLAW_PIDS_LIMIT": DEFAULT_OPENCLAW_PIDS_LIMIT,
+        "OPENCLAW_NOFILE_SOFT": DEFAULT_OPENCLAW_NOFILE_SOFT,
+        "OPENCLAW_NOFILE_HARD": DEFAULT_OPENCLAW_NOFILE_HARD,
+        "OPENCLAW_NPROC": DEFAULT_OPENCLAW_NPROC,
+        "OPENCLAW_TZ": DEFAULT_OPENCLAW_TIMEZONE,
+    }
+    for key, default in runtime_defaults.items():
+        if key == "OPENCLAW_IMAGE":
+            current_value = values.get(key)
+            if current_value == LEGACY_OPENCLAW_IMAGE:
+                value = default
+            else:
+                value = values.get(key, default)
+        else:
+            value = values.get(key, default)
+        lines.append(f"{key}={value}")
+        used_keys.add(key)
+    for key, default in DEFAULT_OPENCLAW_ENV_DEFAULTS:
+        lines.append(f"{key}={values.get(key, default)}")
+        used_keys.add(key)
+    advisory_values = {key: values.get(key, default) for key, default in runtime_defaults.items()}
+    advisory_values.update(
+        {key: values.get(key, default) for key, default in DEFAULT_OPENCLAW_ENV_DEFAULTS}
+    )
+    advisories = assess_runtime_env_security(advisory_values)
+    if advisories:
+        lines.append("")
+        lines.append("# Security advisories for explicit runtime overrides")
+        for advisory in advisories:
+            lines.append(f"# WARNING: {advisory}")
+    if secret_names:
+        lines.append("")
+        lines.append("# Bot secret references")
+        for secret in manifest.runtime.secret_refs:
+            lines.append("")
+            lines.append(f"# source: {secret.source}")
+            lines.append(f"# required: {'true' if secret.required else 'false'}")
+            lines.append(f"{secret.name}={values.get(secret.name, '')}")
+            used_keys.add(secret.name)
+    extra_keys = sorted(key for key in values if key not in used_keys)
+    if extra_keys:
+        lines.append("")
+        lines.append("# Preserved custom values")
+        for key in extra_keys:
+            lines.append(f"{key}={values[key]}")
+    return "\n".join(lines).rstrip() + "\n"</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.compose.write_compose" class="doc doc-heading">
+            <code class="highlight language-python">write_compose(path, compose_text)</code>
+
+<a href="#openenv.docker.compose.write_compose" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Write the compose file to disk.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/compose.py</code></summary>
+              <pre class="highlight"><code class="language-python">def write_compose(path: str | Path, compose_text: str) -&gt; None:
+    """Write the compose file to disk."""
+    Path(path).write_text(compose_text, encoding="utf-8")</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.compose.write_env_file" class="doc doc-heading">
+            <code class="highlight language-python">write_env_file(path, env_text)</code>
+
+<a href="#openenv.docker.compose.write_env_file" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Write the env file to disk.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/compose.py</code></summary>
+              <pre class="highlight"><code class="language-python">def write_env_file(path: str | Path, env_text: str) -&gt; None:
+    """Write the env file to disk."""
+    Path(path).write_text(env_text, encoding="utf-8")</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="openenvdockerbuilder"><code>openenv.docker.builder</code><a class="headerlink" href="#openenvdockerbuilder" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="openenv.docker.builder" class="doc doc-heading">
+            <code>openenv.docker.builder</code>
+
+
+<a href="#openenv.docker.builder" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Docker image build helpers.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.builder.build_image" class="doc doc-heading">
+            <code class="highlight language-python">build_image(dockerfile_text, tag)</code>
+
+<a href="#openenv.docker.builder.build_image" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Build a Docker image from a rendered Dockerfile.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/builder.py</code></summary>
+              <pre class="highlight"><code class="language-python">def build_image(dockerfile_text: str, tag: str) -&gt; None:
+    """Build a Docker image from a rendered Dockerfile."""
+    build_image_with_args(dockerfile_text, tag, build_args=None)</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.builder.build_image_with_args" class="doc doc-heading">
+            <code class="highlight language-python">build_image_with_args(dockerfile_text, tag, *, build_args)</code>
+
+<a href="#openenv.docker.builder.build_image_with_args" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Build a Docker image from a rendered Dockerfile with optional build args.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/builder.py</code></summary>
+              <pre class="highlight"><code class="language-python">def build_image_with_args(
+    dockerfile_text: str,
+    tag: str,
+    *,
+    build_args: dict[str, str] | None,
+) -&gt; None:
+    """Build a Docker image from a rendered Dockerfile with optional build args."""
+    with tempfile.TemporaryDirectory(prefix="openclawenv-build-") as temp_dir:
+        dockerfile_path = Path(temp_dir) / "Dockerfile"
+        dockerfile_path.write_text(dockerfile_text, encoding="utf-8")
+        command = [
+            "docker",
+            "build",
+            "--tag",
+            tag,
+            "--file",
+            str(dockerfile_path),
+            temp_dir,
+        ]
+        for key, value in sorted((build_args or {}).items()):
+            command.extend(["--build-arg", f"{key}={value}"])
+        try:
+            subprocess.run(command, check=True)
+        except OSError as exc:
+            raise CommandError("Docker is not available on PATH.") from exc
+        except subprocess.CalledProcessError as exc:
+            raise CommandError(
+                f"Docker build failed for tag {tag} with exit code {exc.returncode}."
+            ) from exc</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.builder.default_image_tag" class="doc doc-heading">
+            <code class="highlight language-python">default_image_tag(project_name, version)</code>
+
+<a href="#openenv.docker.builder.default_image_tag" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Compute the default docker tag for a project.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/builder.py</code></summary>
+              <pre class="highlight"><code class="language-python">def default_image_tag(project_name: str, version: str) -&gt; str:
+    """Compute the default docker tag for a project."""
+    return f"openclawenv/{slugify_name(project_name)}:{version}"</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="openenvdockerruntime"><code>openenv.docker.runtime</code><a class="headerlink" href="#openenvdockerruntime" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="openenv.docker.runtime" class="doc doc-heading">
+            <code>openenv.docker.runtime</code>
+
+
+<a href="#openenv.docker.runtime" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Runtime inspection helpers for running bot containers.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="openenv.docker.runtime.CapturedSkill" class="doc doc-heading">
+            <code>CapturedSkill</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#openenv.docker.runtime.CapturedSkill" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>A skill snapshot collected from a running container.</p>
+
+
+
+
+
+
+
+
+              <details class="mkdocstrings-source">
+                <summary>Source code in <code>src/openenv/docker/runtime.py</code></summary>
+                <pre class="highlight"><code class="language-python">@dataclass(slots=True)
+class CapturedSkill:
+    """A skill snapshot collected from a running container."""
+
+    name: str
+    description: str
+    content: str
+    source: str | None = None
+    assets: dict[str, str] = field(default_factory=dict)</code></pre>
+              </details>
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.runtime.fetch_container_logs" class="doc doc-heading">
+            <code class="highlight language-python">fetch_container_logs(container_name, *, tail=120)</code>
+
+<a href="#openenv.docker.runtime.fetch_container_logs" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return recent logs for a running container.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/runtime.py</code></summary>
+              <pre class="highlight"><code class="language-python">def fetch_container_logs(container_name: str, *, tail: int = 120) -&gt; str:
+    """Return recent logs for a running container."""
+    return _run_command(
+        ["docker", "logs", "--tail", str(tail), container_name],
+        unavailable_message=(
+            "Docker is not available on PATH. Install Docker or Docker Desktop "
+            "before reading bot logs."
+        ),
+        failure_message=f"Failed to read logs for container `{container_name}`.",
+    )</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.runtime.list_running_container_names" class="doc doc-heading">
+            <code class="highlight language-python">list_running_container_names()</code>
+
+<a href="#openenv.docker.runtime.list_running_container_names" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the names of running Docker containers.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/runtime.py</code></summary>
+              <pre class="highlight"><code class="language-python">def list_running_container_names() -&gt; set[str]:
+    """Return the names of running Docker containers."""
+    stdout = _run_command(
+        ["docker", "ps", "--format", "{{.Names}}"],
+        unavailable_message=(
+            "Docker is not available on PATH. Install Docker or Docker Desktop "
+            "before listing running bots."
+        ),
+        failure_message="Failed to list running Docker containers.",
+    )
+    return {line.strip() for line in stdout.splitlines() if line.strip()}</code></pre>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="openenv.docker.runtime.snapshot_installed_skills" class="doc doc-heading">
+            <code class="highlight language-python">snapshot_installed_skills(container_name, *, workspace)</code>
+
+<a href="#openenv.docker.runtime.snapshot_installed_skills" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Snapshot installed skills from a running bot container.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/openenv/docker/runtime.py</code></summary>
+              <pre class="highlight"><code class="language-python">def snapshot_installed_skills(
+    container_name: str,
+    *,
+    workspace: str,
+) -&gt; list[CapturedSkill]:
+    """Snapshot installed skills from a running bot container."""
+    stdout = _run_command(
+        [
+            "docker",
+            "exec",
+            container_name,
+            "python",
+            "-c",
+            SNAPSHOT_SCRIPT_TEMPLATE.format(workspace=workspace),
+        ],
+        unavailable_message=(
+            "Docker is not available on PATH. Install Docker or Docker Desktop "
+            "before creating a skill snapshot."
+        ),
+        failure_message=f"Failed to snapshot installed skills for `{container_name}`.",
+    )
+    try:
+        payload = json.loads(stdout.strip() or "[]")
+    except json.JSONDecodeError as exc:
+        raise CommandError(
+            f"Container `{container_name}` returned an unreadable skill snapshot payload."
+        ) from exc
+    if not isinstance(payload, list):
+        raise CommandError(
+            f"Container `{container_name}` returned an invalid skill snapshot payload."
+        )
+
+    snapshots: list[CapturedSkill] = []
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name", "")).strip()
+        files = item.get("files", {})
+        if not name or not isinstance(files, dict):
+            continue
+        skill_md = files.get("SKILL.md")
+        if not isinstance(skill_md, str) or not skill_md.strip():
+            continue
+        assets = {
+            path: content
+            for path, content in sorted(files.items())
+            if path != "SKILL.md" and isinstance(path, str) and isinstance(content, str)
+        }
+        frontmatter = _parse_frontmatter(skill_md)
+        snapshots.append(
+            CapturedSkill(
+                name=name,
+                description=frontmatter.get(
+                    "description",
+                    f"Snapshotted skill from running container {container_name}",
+                ),
+                content=skill_md,
+                source=frontmatter.get("source"),
+                assets=assets,
+            )
+        )
+    return snapshots</code></pre>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+  </div>
+  
+  <script>
+    document.querySelectorAll('article h2, article h3').forEach((header) => {
+      toc.observer.observe(header);
+    });
+  </script>
+</article>
+                                <div class="mx-auto flex flex-wrap h-16 w-full max-w-2xl items-center gap-2 px-4 md:px-0">
+    
+    <a data-slot="button"
+        class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-secondary text-secondary-foreground hover:bg-secondary/80 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 shadow-none"
+        href="None">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="tabler-icon tabler-icon-arrow-left ">
+            <path d="M5 12l14 0"></path>
+            <path d="M5 12l6 6"></path>
+            <path d="M5 12l6 -6"></path>
+        </svg>
+        <span class="max-[500px]:hidden">Manifests</span>
+    </a>
+    
+    
+    <a data-slot="button"
+        class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-secondary text-secondary-foreground hover:bg-secondary/80 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 ml-auto shadow-none"
+        href="None">
+        <span class="max-[500px]:hidden">Bots</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="tabler-icon tabler-icon-arrow-right ">
+            <path d="M5 12l14 0"></path>
+            <path d="M13 18l6 -6"></path>
+            <path d="M13 6l6 6"></path>
+        </svg>
+    </a>
+    
+</div>
+                                <dialog id="bottom-sidebar" onclick="onBottomSidebarDialogClick(event)" class="bg-transparent"
+    style="position: fixed; left: 0px; top: 0px; transform: translate(0px, 58px); min-width: max-content; --radix-popper-transform-origin: 0% 0px; will-change: transform; z-index: 50; --radix-popper-available-width: 504px; --radix-popper-available-height: 857px; --radix-popper-anchor-width: 72.94999694824219px; --radix-popper-anchor-height: 32px;">
+    <div data-side="bottom" data-align="start" data-state="open" role="dialog" data-slot="popover-content"
+        class="text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 origin-(--radix-popover-content-transform-origin) border outline-hidden bg-background/90 no-scrollbar h-(--radix-popper-available-height) w-(--radix-popper-available-width) overflow-y-auto rounded-none border-none p-0 shadow-none backdrop-blur duration-100"
+        style="--radix-popover-content-transform-origin: var(--radix-popper-transform-origin); --radix-popover-content-available-width: var(--radix-popper-available-width); --radix-popover-content-available-height: var(--radix-popper-available-height); --radix-popover-trigger-width: var(--radix-popper-anchor-width); --radix-popover-trigger-height: var(--radix-popper-anchor-height);"
+        tabindex="-1">
+        <div class="flex flex-col gap-12 overflow-auto px-6 py-6">
+            
+            
+            
+
+            
+            <div class="flex flex-col gap-4">
+                <div class="text-muted-foreground text-sm font-medium">Menu</div>
+                <div class="flex flex-col gap-3">
+                    
+                    <a class="text-2xl font-medium" href="../..">
+                        
+                        Overview
+                        
+                    </a>
+                    
+                    <a class="text-2xl font-medium" href="../../getting-started/">
+                        
+                        Getting Started
+                        
+                    </a>
+                    
+                    <a class="text-2xl font-medium" href="../../concepts/">
+                        
+                        Concepts
+                        
+                    </a>
+                    
+                    <a class="text-2xl font-medium" href="../../security/">
+                        
+                        Security Notes
+                        
+                    </a>
+                    
+                    <a class="text-2xl font-medium" href="../../openclawenv-toml/">
+                        
+                        openclawenv.toml Structure
+                        
+                    </a>
+                    
+                    <a class="text-2xl font-medium" href="../../changelog/">
+                        
+                        Changelog
+                        
+                    </a>
+                    
+                </div>
+            </div>
+            
+
+            
+            <div class="flex flex-col gap-8">
+                
+                <div class="flex flex-col gap-4">
+                    <div class="text-muted-foreground text-sm font-medium">API</div>
+                    
+                    <div class="flex flex-col gap-3">
+                        
+                        <a class="text-2xl font-medium" href="../">
+                            
+                            Overview
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="../cli/">
+                            
+                            CLI
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="../manifests/">
+                            
+                            Manifests
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="./">
+                            
+                            Docker
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="../bots/">
+                            
+                            Bots
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="../integrations/">
+                            
+                            Integrations
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="../envfiles/">
+                            
+                            Env Files
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="../core/">
+                            
+                            Core
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="../templates/">
+                            
+                            Templates
+                            
+                        </a>
+                        
+                    </div>
+                    
+                </div>
+                
+            </div>
+            
+            
+
+        </div>
+    </div>
+</dialog>
+                            </div>
+                            <div
+                                class="sticky top-[calc(var(--header-height)+1px)] ml-auto hidden h-[calc(100svh-var(--header-height)-var(--footer-height))] w-72 flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex">
+                                <div class="h-(--top-spacing) shrink-0"></div>
+                                <div id="toc" view-transition-name="toc" class="no-scrollbar overflow-y-auto px-8">
+    <div class="flex flex-col gap-2 p-4 pt-0 text-sm">
+        <p class="text-muted-foreground bg-background sticky top-0 h-6 text-xs">On This Page</p>
+        
+        
+        
+        
+        <a href="#openenvdocker"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#openenvdocker');">
+            openenv.docker
+        </a>
+        
+
+        
+        <a href="#openenv.docker"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#openenv.docker');">
+            docker
+        </a>
+        
+
+        
+        <a href="#openenvdockerdockerfile"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#openenvdockerdockerfile');">
+            openenv.docker.dockerfile
+        </a>
+        
+
+        
+        <a href="#openenv.docker.dockerfile"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#openenv.docker.dockerfile');">
+            dockerfile
+        </a>
+        
+        
+        <a href="#openenv.docker.dockerfile.render_dockerfile"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.dockerfile.render_dockerfile');">
+            render_dockerfile
+        </a>
+        
+        
+
+        
+        <a href="#openenvdockercompose"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#openenvdockercompose');">
+            openenv.docker.compose
+        </a>
+        
+
+        
+        <a href="#openenv.docker.compose"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#openenv.docker.compose');">
+            compose
+        </a>
+        
+        
+        <a href="#openenv.docker.compose.AllBotsComposeSpec"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.compose.AllBotsComposeSpec');">
+            AllBotsComposeSpec
+        </a>
+        
+        <a href="#openenv.docker.compose.all_bots_compose_filename"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.compose.all_bots_compose_filename');">
+            all_bots_compose_filename
+        </a>
+        
+        <a href="#openenv.docker.compose.cli_container_name"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.compose.cli_container_name');">
+            cli_container_name
+        </a>
+        
+        <a href="#openenv.docker.compose.default_compose_filename"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.compose.default_compose_filename');">
+            default_compose_filename
+        </a>
+        
+        <a href="#openenv.docker.compose.default_env_filename"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.compose.default_env_filename');">
+            default_env_filename
+        </a>
+        
+        <a href="#openenv.docker.compose.gateway_container_name"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.compose.gateway_container_name');">
+            gateway_container_name
+        </a>
+        
+        <a href="#openenv.docker.compose.render_all_bots_compose"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.compose.render_all_bots_compose');">
+            render_all_bots_compose
+        </a>
+        
+        <a href="#openenv.docker.compose.render_compose"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.compose.render_compose');">
+            render_compose
+        </a>
+        
+        <a href="#openenv.docker.compose.render_env_file"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.compose.render_env_file');">
+            render_env_file
+        </a>
+        
+        <a href="#openenv.docker.compose.write_compose"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.compose.write_compose');">
+            write_compose
+        </a>
+        
+        <a href="#openenv.docker.compose.write_env_file"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.compose.write_env_file');">
+            write_env_file
+        </a>
+        
+        
+
+        
+        <a href="#openenvdockerbuilder"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#openenvdockerbuilder');">
+            openenv.docker.builder
+        </a>
+        
+
+        
+        <a href="#openenv.docker.builder"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#openenv.docker.builder');">
+            builder
+        </a>
+        
+        
+        <a href="#openenv.docker.builder.build_image"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.builder.build_image');">
+            build_image
+        </a>
+        
+        <a href="#openenv.docker.builder.build_image_with_args"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.builder.build_image_with_args');">
+            build_image_with_args
+        </a>
+        
+        <a href="#openenv.docker.builder.default_image_tag"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.builder.default_image_tag');">
+            default_image_tag
+        </a>
+        
+        
+
+        
+        <a href="#openenvdockerruntime"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#openenvdockerruntime');">
+            openenv.docker.runtime
+        </a>
+        
+
+        
+        <a href="#openenv.docker.runtime"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#openenv.docker.runtime');">
+            runtime
+        </a>
+        
+        
+        <a href="#openenv.docker.runtime.CapturedSkill"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.runtime.CapturedSkill');">
+            CapturedSkill
+        </a>
+        
+        <a href="#openenv.docker.runtime.fetch_container_logs"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.runtime.fetch_container_logs');">
+            fetch_container_logs
+        </a>
+        
+        <a href="#openenv.docker.runtime.list_running_container_names"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.runtime.list_running_container_names');">
+            list_running_container_names
+        </a>
+        
+        <a href="#openenv.docker.runtime.snapshot_installed_skills"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#openenv.docker.runtime.snapshot_installed_skills');">
+            snapshot_installed_skills
+        </a>
+        
+        
+
+        
+        
+        
+        
+
+    </div>
+    <div class="h-12"></div>
+
+</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer view-transition-name="footer"
+    class="group-has-[.section-soft]/body:bg-surface/40 3xl:fixed:bg-transparent dark:bg-transparent">
+    <div class="container-wrapper px-4 xl:px-6">
+        <div class="flex h-(--footer-height) items-center justify-between">
+            <div class="text-muted-foreground w-full text-center text-xs leading-loose sm:text-sm">
+                
+                <a href="https://github.com/asiffer/mkdocs-shadcn">shadcn theme</a> provided by
+                <a href="https://github.com/asiffer">@asiffer</a>
+            </div>
+        </div>
+    </div>
+</footer>
+    </div>
+     
+
+<script src="../../search/main.js"></script>
+
+
+    
+
+    <script src="../../js/copy-button.js"></script>
+    <script>updatePygmentsStylesheet();</script>
+    
+    <script>fetchStargazers("https://github.com/fipciu1996/OpenClaw-env-manager");</script>
+    
+    
+    <script>
+    for (const el of document.querySelectorAll(
+        ".typography .doc code.language-python",
+    )) {
+        el.classList.add("codehilite");
+    }
+
+    for (const el of document.querySelectorAll("article .doc .doc-contents")) {
+        el.innerHTML = el.innerHTML.trim();
+    }
+</script>
+    
+    
+    <script type="speculationrules">
+{
+  "prerender": [
+    {
+      "where": {
+          "selector_matches": ["#next-button", "#previous-button"]
+      }
+    }
+  ]
+}
+</script>
+</body>
+
+</html>

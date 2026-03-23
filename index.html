@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script>
+        const base_url = "None"; /* for search plugin notably */
+    </script>
+    <script>
+    const darkTheme = window.matchMedia("(prefers-color-scheme: dark)");
+    darkTheme.onchange = (e) => {
+        if (e.matches) {
+            document.documentElement.classList.add("dark")
+            localStorage.theme = 'dark';
+        } else {
+            document.documentElement.classList.remove("dark")
+            localStorage.removeItem("theme")
+        }
+    };
+
+    // On page load. Priotiry to lcaolStorage
+    if (localStorage.theme === "dark") {
+        document.documentElement.classList.add("dark")
+    } else if (localStorage.theme === "light") {
+        document.documentElement.classList.remove("dark")
+    } else if (darkTheme.matches) {
+        document.documentElement.classList.add("dark")
+    } else {
+        document.documentElement.classList.remove("dark")
+    }
+
+    // set the layout based on localStorage
+    document.documentElement.classList.add(localStorage.getItem("html-layout") || "layout-fixed");
+</script>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+
+
+<title>Overview</title>
+
+
+
+
+
+
+
+
+
+
+<!-- Open Graph (Facebook, LinkedIn) -->
+
+<meta property="og:title" content="Overview">
+
+
+
+
+
+
+
+
+
+
+<!-- Twitter Card -->
+
+<meta name="twitter:title" content="Overview">
+
+
+
+
+
+
+<!-- JSON-LD Structured Data -->
+
+
+
+    <link rel="icon" href="img/favicon.ico">
+
+    <link href="css/base.css" rel="stylesheet">
+    <link href="css/geist.css" rel="stylesheet">
+
+    
+    <link href="assets/_mkdocstrings.css" rel="stylesheet">
+
+    
+
+    <script src="js/callbacks.js"></script>
+
+    
+
+    
+
+    
+
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("a.headerlink").forEach(function (link) {
+            link.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                // Build the full URL with the anchor fragment
+                const url = window.location.origin + window.location.pathname + this.getAttribute("href");
+
+                navigator.clipboard.writeText(url).then(function () {
+                    // Optional: brief visual feedback
+                });
+            });
+        });
+    });
+</script>
+    
+
+</head>
+
+<body
+    class="text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)] theme-default">
+    <div id="inner-body" class="bg-background relative z-10 flex min-h-svh flex-col">
+        <header class="bg-background sticky top-0 z-50 w-full" view-transition-name="header">
+    <div class="container-wrapper 3xl:fixed:px-0 px-6">
+        <div class="3xl:fixed:container flex h-(--header-height) items-center gap-2 **:data-[slot=separator]:!h-4">
+            <button id="menu-button" data-slot="popover-trigger" onclick="onMobileMenuButtonClick(event)"
+                class="group whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:text-accent-foreground px-4 py-2 has-[&gt;svg]:px-3 extend-touch-target h-8 touch-manipulation items-center justify-start gap-2.5 !p-0 hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 active:bg-transparent dark:hover:bg-transparent flex lg:hidden"
+                type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-«Rmplb»"
+                data-state="closed">
+                <div class="relative flex h-8 w-4 items-center justify-center">
+                    <div class="relative size-4">
+                        <!-- 16px x 16px -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="0" x2="16" y1="5" y2="5"
+                                class="group-data-[state=open]:translate-y-[2.25px] group-data-[state=open]:-translate-x-[2.25px] group-data-[state=open]:rotate-45 transition-all duration-300 origin-center" />
+                            <line x1="0" x2="16" y1="11" y2="11"
+                                class="group-data-[state=open]:-translate-y-[2.25px] group-data-[state=open]:-translate-x-[2.25px] group-data-[state=open]:-rotate-45 transition-all duration-300 origin-center" />
+                        </svg>
+                    </div>
+
+                    <span class="sr-only">Toggle Menu</span>
+                </div>
+                <span class="flex h-8 items-center text-lg leading-none font-medium">Menu</span>
+            </button>
+            <a data-slot="button"
+                class="items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-5 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 hidden h-8 lg:flex"
+                href="None">
+                <span class="size-8 flex flex-row justify-center items-center">
+                    
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"
+    class="size-5">
+    <rect width="256" height="256" fill="none"></rect>
+    <line x1="208" y1="128" x2="128" y2="208" fill="none" stroke="currentColor" stroke-linecap="round"
+        stroke-linejoin="round" stroke-width="32"></line>
+    <line x1="192" y1="40" x2="40" y2="192" fill="none" stroke="currentColor" stroke-linecap="round"
+        stroke-linejoin="round" stroke-width="32"></line>
+</svg>
+
+
+                </span>
+
+                
+                <h1 class="pr-2">OpenClaw-env-manager</h1>
+                
+            </a>
+            
+            <div class="ml-auto flex items-center gap-2 md:flex-1 md:justify-end">
+                <div class="hidden w-full flex-1 md:flex md:w-auto md:flex-none">
+                    <div class="hidden w-full flex-1 md:flex md:w-auto md:flex-none">
+    <button onclick="onSearchBarClick(event)" data-slot="dialog-trigger" data-variant="outline" data-size="default" class="inline-flex shrink-0 items-center gap-2 text-sm whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*='size-'])]:size-4 border bg-background hover:text-accent-foreground dark:border-input dark:hover:bg-input/50 px-4 py-2 has-[&gt;svg]:px-3 relative h-8 w-full justify-start rounded-lg pl-3 font-normal text-foreground shadow-none hover:bg-muted/50 sm:pr-12 md:w-48 lg:w-56 xl:w-64 dark:bg-card" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-_r_1_" data-state="closed">
+        <span class="hidden lg:inline-flex">Search documentation...</span>
+        <span class="inline-flex lg:hidden">Search...</span>
+    </button>
+</div>
+<dialog id="search-dialog" onclick="onSearchDialogClick(event)"
+    class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background rounded-lg shadow-lg border overflow-hidden p-0">
+    <div class="w-lg gap-4">
+        <div class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground">
+            <div data-slot="command-input-wrapper" class="flex h-9 items-center gap-2 border-b px-3"><svg
+                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-search size-4 shrink-0 opacity-50">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <input data-slot="command-input"
+                    class="placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Search documentation..." cmdk-input="" autocomplete="off" autocorrect="off"
+                    spellcheck="false" aria-autocomplete="list" role="combobox" aria-expanded="true"
+                    aria-controls="radix-«r1t6»" aria-labelledby="radix-«r1t7»" id="radix-«r1t8»" type="text" value=""
+                    aria-activedescendant="radix-«r1th»" oninput="onInputHandler(event)">
+            </div>
+        </div>
+        <div id="mkdocs-search-results">
+            <!-- search results go there -->
+        </div>
+    </div>
+</dialog>
+<script>
+    document.removeEventListener("keydown", searchShortcutHandler);
+    document.addEventListener("keydown", searchShortcutHandler);
+</script>
+                </div>
+                
+                <div data-orientation="vertical" role="none" data-slot="separator"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px ml-2 hidden lg:block">
+                </div>
+                <a target="_blank" rel="noreferrer" data-slot="button"
+                    class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 h-8 shadow-none"
+                    href="https://github.com/fipciu1996/OpenClaw-env-manager">
+                    <svg viewBox="0 0 438.549 438.549">
+                        <path fill="currentColor"
+                            d="M409.132 114.573c-19.608-33.596-46.205-60.194-79.798-79.8-33.598-19.607-70.277-29.408-110.063-29.408-39.781 0-76.472 9.804-110.063 29.408-33.596 19.605-60.192 46.204-79.8 79.8C9.803 148.168 0 184.854 0 224.63c0 47.78 13.94 90.745 41.827 128.906 27.884 38.164 63.906 64.572 108.063 79.227 5.14.954 8.945.283 11.419-1.996 2.475-2.282 3.711-5.14 3.711-8.562 0-.571-.049-5.708-.144-15.417a2549.81 2549.81 0 01-.144-25.406l-6.567 1.136c-4.187.767-9.469 1.092-15.846 1-6.374-.089-12.991-.757-19.842-1.999-6.854-1.231-13.229-4.086-19.13-8.559-5.898-4.473-10.085-10.328-12.56-17.556l-2.855-6.57c-1.903-4.374-4.899-9.233-8.992-14.559-4.093-5.331-8.232-8.945-12.419-10.848l-1.999-1.431c-1.332-.951-2.568-2.098-3.711-3.429-1.142-1.331-1.997-2.663-2.568-3.997-.572-1.335-.098-2.43 1.427-3.289 1.525-.859 4.281-1.276 8.28-1.276l5.708.853c3.807.763 8.516 3.042 14.133 6.851 5.614 3.806 10.229 8.754 13.846 14.842 4.38 7.806 9.657 13.754 15.846 17.847 6.184 4.093 12.419 6.136 18.699 6.136 6.28 0 11.704-.476 16.274-1.423 4.565-.952 8.848-2.383 12.847-4.285 1.713-12.758 6.377-22.559 13.988-29.41-10.848-1.14-20.601-2.857-29.264-5.14-8.658-2.286-17.605-5.996-26.835-11.14-9.235-5.137-16.896-11.516-22.985-19.126-6.09-7.614-11.088-17.61-14.987-29.979-3.901-12.374-5.852-26.648-5.852-42.826 0-23.035 7.52-42.637 22.557-58.817-7.044-17.318-6.379-36.732 1.997-58.24 5.52-1.715 13.706-.428 24.554 3.853 10.85 4.283 18.794 7.952 23.84 10.994 5.046 3.041 9.089 5.618 12.135 7.708 17.705-4.947 35.976-7.421 54.818-7.421s37.117 2.474 54.823 7.421l10.849-6.849c7.419-4.57 16.18-8.758 26.262-12.565 10.088-3.805 17.802-4.853 23.134-3.138 8.562 21.509 9.325 40.922 2.279 58.24 15.036 16.18 22.559 35.787 22.559 58.817 0 16.178-1.958 30.497-5.853 42.966-3.9 12.471-8.941 22.457-15.125 29.979-6.191 7.521-13.901 13.85-23.131 18.986-9.232 5.14-18.182 8.85-26.84 11.136-8.662 2.286-18.415 4.004-29.263 5.146 9.894 8.562 14.842 22.077 14.842 40.539v60.237c0 3.422 1.19 6.279 3.572 8.562 2.379 2.279 6.136 2.95 11.276 1.995 44.163-14.653 80.185-41.062 108.068-79.226 27.88-38.161 41.825-81.126 41.825-128.906-.01-39.771-9.818-76.454-29.414-110.049z">
+                        </path>
+                    </svg>
+                    
+                    <span id="stargazers" class="text-muted-foreground w-8 text-xs tabular-nums" onload="test()">
+                    </span>
+                    
+                </a>
+                
+                <div data-orientation="vertical" role="none" data-slot="separator"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px 3xl:flex hidden">
+                </div>
+                <button data-slot="button"
+                    class="items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-8 3xl:flex hidden"
+                    title="Toggle layout" onclick="toggleLayout(event)">
+                    <span class="sr-only">Toggle layout</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-gallery-horizontal">
+                        <path d="M2 3v18"></path>
+                        <rect width="12" height="18" x="6" y="3" rx="2"></rect>
+                        <path d="M22 3v18"></path>
+                    </svg>
+                </button>
+                <div data-orientation="vertical" role="none" data-slot="separator"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px">
+                </div>
+                <button data-slot="button"
+                    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 group/toggle extend-touch-target size-8"
+                    title="Toggle theme" onclick="onThemeSwitch(event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="size-4.5">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                        <path d="M12 3l0 18"></path>
+                        <path d="M12 9l4.65 -4.65"></path>
+                        <path d="M12 14.3l7.37 -7.37"></path>
+                        <path d="M12 19.6l8.85 -8.85"></path>
+                    </svg>
+                    <span class="sr-only">Toggle theme</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+        <main class="flex flex-1 flex-col">
+            <div class="container-wrapper flex flex-1 flex-col px-2">
+                <div data-slot="sidebar-wrapper"
+                    style="--sidebar-width:calc(var(--spacing) * 72);--sidebar-width-icon:3rem;"
+                    class="group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex w-full 3xl:fixed:container 3xl:fixed:px-3 min-h-min flex-1 items-start px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:240px] lg:[--top-spacing:calc(var(--spacing)*4)]">
+                    <div data-slot="sidebar"
+                        class="w-(--sidebar-width) flex-col text-sidebar-foreground sticky top-[calc(var(--header-height)+0.6rem)] z-30 hidden h-[calc(100svh-10rem)] overscroll-none bg-transparent [--sidebar-menu-width:--spacing(56)] lg:flex">
+                        <div class="h-9"></div>
+                        <div
+                            class="absolute top-8 z-10 h-8 w-(--sidebar-menu-width) shrink-0 bg-gradient-to-b from-background via-background/80 to-background/50 blur-xs">
+                        </div>
+                        <div
+                            class="absolute top-12 right-2 bottom-0 hidden h-full w-px bg-gradient-to-b from-transparent via-border to-transparent lg:flex">
+                        </div>
+                        <div data-slot="sidebar-content" data-sidebar="content" view-transition-name="sidebar"
+                            class="flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden mx-auto no-scrollbar w-(--sidebar-menu-width) overflow-x-hidden px-2">
+                            
+
+
+
+
+
+
+
+
+
+
+
+<div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col p-2 pt-6">
+    <div data-slot="sidebar-group-content" data-sidebar="group-content" class="w-full text-sm">
+        <ul data-slot="sidebar-menu" data-sidebar="menu" class="flex w-full min-w-0 flex-col gap-0.5">
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="true" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Overview
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Getting Started
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Concepts
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Security Notes
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        openclawenv.toml Structure
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Changelog
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+<div data-slot="sidebar-group" data-sidebar="group" class="relative flex w-full min-w-0 flex-col p-2">
+    <div data-slot="sidebar-group-label" data-sidebar="group-label"
+        class="flex h-8 shrink-0 items-center rounded-md px-2 text-xs ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0 group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 font-medium text-muted-foreground">
+        API</div>
+    <div data-slot="sidebar-group-content" data-sidebar="group-content" class="w-full text-sm">
+        <ul data-slot="sidebar-menu" data-sidebar="menu" class="flex w-full min-w-0 flex-col gap-0.5">
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Overview
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        CLI
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Manifests
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Docker
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Bots
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Integrations
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Env Files
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Core
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+            <li data-slot="sidebar-menu-item" data-sidebar="menu-item" class="group/menu-item relative">
+    <a data-slot="sidebar-menu-button" data-active="false" data-sidebar="menu-button"
+        data-size="default" href="None"
+        class="hpeer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48">
+
+        
+        Templates
+        
+
+        
+
+        
+
+        
+    </a>
+</li>
+            
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+<div class="sticky -bottom-1 z-10 h-16 shrink-0 bg-gradient-to-t from-background via-background/80 to-background/50 blur-xs"></div>
+                        </div>
+                    </div>
+                    <div class="h-full w-full">
+                        <div data-slot="docs" class="flex items-stretch text-[1.05rem] sm:text-[15px] xl:w-full">
+                            <div class="flex min-w-0 flex-1 flex-col">
+                                <div class="h-(--top-spacing) shrink-0"></div>
+                                <article class="w-full" view-transition-name="page">
+  <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2">
+      <div id="page-header" class="flex items-start justify-between">
+        <h1 class="scroll-m-20 text-4xl font-semibold tracking-tight sm:text-3xl xl:text-4xl">
+          Overview
+        </h1>
+
+        <div class="flex items-center gap-2 pt-1.5">
+          
+<button onclick="fetch(`/index.md`).then((r) => r.blob()).then((blob) => navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })]))" 
+        data-slot="button" 
+        class="cursor-pointer inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md gap-1.5 px-3 has-[&>svg]:px-2.5 h-8 shadow-none md:h-7 md:text-[0.8rem]">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-copy ">
+    <path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z"></path><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1"></path>
+</svg>
+<span class="max-md:hidden">Copy Page</span>
+</button>
+          
+          
+          <a data-slot="button" id="next-button"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-secondary text-secondary-foreground hover:bg-secondary/80 extend-touch-target size-8 shadow-none md:size-7"
+            href="None">
+            <span class="sr-only">Next</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="tabler-icon tabler-icon-arrow-right">
+              <path d="M5 12l14 0"></path>
+              <path d="M13 18l6 -6"></path>
+              <path d="M13 6l6 6"></path>
+            </svg>
+          </a>
+          
+        </div>
+      </div>
+      
+    </div>
+    <div class="flex justify-end items-center">
+       
+    </div>
+  </div>
+  <div class="typography w-full flex-1 *:data-[slot=alert]:first:mt-0">
+    <p><a href="https://github.com/fipciu1996/OpenClaw-env-manager/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/fipciu1996/OpenClaw-env-manager/actions/workflows/ci.yml/badge.svg?branch=main" /></a>
+<a href="https://fipciu1996.github.io/OpenClaw-env-manager/coverage/"><img alt="Coverage" src="https://fipciu1996.github.io/OpenClaw-env-manager/coverage.svg" /></a></p>
+<p>OpenClaw-env-manager is a Python CLI for defining an OpenClaw agent environment in one
+declarative <code>openclawenv.toml</code> file and turning it into deterministic Docker
+artifacts.</p>
+<p>When run without arguments, the CLI opens an interactive terminal menu for bot
+management.</p>
+<p>It is inspired by Poetry's manifest-plus-lock workflow:</p>
+<ul>
+<li><code>openclawenv.toml</code> describes intent</li>
+<li><code>openclawenv.lock</code> captures deterministic build inputs</li>
+<li><code>clawopenenv scan</code> runs an optional preflight security scan for materialized skills</li>
+<li><code>clawopenenv export dockerfile</code> renders a standalone Dockerfile</li>
+<li><code>clawopenenv export compose</code> renders a bot-specific docker-compose file</li>
+<li><code>clawopenenv build</code> builds the image and enforces a build-time skill scan gate</li>
+</ul>
+<h2 id="table-of-contents">Table Of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="#ci-and-coverage">CI And Coverage</a></li>
+<li><a href="#releases-and-pypi">Releases And PyPI</a></li>
+<li><a href="#documentation">Documentation</a></li>
+<li><a href="#host-prerequisites">Host Prerequisites</a></li>
+<li><a href="#windows">Windows</a></li>
+<li><a href="#macos">macOS</a></li>
+<li><a href="#linux">Linux</a></li>
+<li><a href="#notes">Notes</a></li>
+<li><a href="#v1-scope">V1 Scope</a></li>
+<li><a href="#security-notes">Security Notes</a></li>
+<li><a href="#manifest-shape">Manifest Shape</a></li>
+<li><a href="#cli">CLI</a></li>
+<li><a href="#makefile">Makefile</a></li>
+<li><a href="#interactive-bot-menu">Interactive Bot Menu</a></li>
+<li><a href="#generated-image-contents">Generated Image Contents</a></li>
+<li><a href="#tests">Tests</a></li>
+</ul>
+<h2 id="ci-and-coverage">CI And Coverage<a class="headerlink" href="#ci-and-coverage" title="Permanent link">&para;</a></h2>
+<p>GitHub Actions runs the test suite for every push to <code>main</code>, every pull request,
+and on manual dispatch. A separate coverage job runs the tests under
+<code>coverage.py</code>, uploads the raw reports as workflow artifacts, validates the
+MkDocs build, and publishes the generated MkDocs site to GitHub Pages for
+pushes to <code>main</code>. The same deployed Pages site also contains the HTML coverage
+report plus the generated coverage badge.</p>
+<p>Once GitHub Pages is enabled for the repository with <code>Build and deployment</code>
+configured to <code>Deploy from a branch</code> and branch <code>gh-pages</code> at <code>/ (root)</code>, the
+published docs site is available at
+<a href="https://fipciu1996.github.io/OpenClaw-env-manager/">fipciu1996.github.io/OpenClaw-env-manager/</a>,
+while the coverage report stays under
+<a href="https://fipciu1996.github.io/OpenClaw-env-manager/coverage/">fipciu1996.github.io/OpenClaw-env-manager/coverage/</a>.</p>
+<h2 id="releases-and-pypi">Releases And PyPI<a class="headerlink" href="#releases-and-pypi" title="Permanent link">&para;</a></h2>
+<p>Package publication to PyPI is handled by
+<code>.github/workflows/publish-pypi.yml</code>.</p>
+<p>The release workflow is intentionally narrow:</p>
+<ul>
+<li>it runs only on pushed release tags matching <code>1.2.3</code> or <code>v1.2.3</code></li>
+<li>it verifies that the tag version matches <code>[project].version</code> in
+  <code>pyproject.toml</code></li>
+<li>it builds both <code>sdist</code> and <code>wheel</code></li>
+<li>it checks the generated distributions with <code>twine</code></li>
+<li>it publishes to PyPI through Trusted Publishing with GitHub OIDC</li>
+</ul>
+<p>Example release tag:</p>
+<pre><code class="language-bash">make install-hooks
+make release-tag VERSION=1.0.1 TAG_MESSAGE=&quot;OpenClaw-env-manager 1.0.1&quot;
+git push origin 1.0.1
+</code></pre>
+<p>Git does not provide a native <code>pre-tag</code> hook, so OpenClaw-env-manager uses a practical
+replacement:</p>
+<ul>
+<li><code>python .github/scripts/create_release_tag.py &lt;tag&gt;</code> or
+  <code>make release-tag VERSION=&lt;tag&gt;</code> updates <code>pyproject.toml</code> and <code>CHANGELOG.md</code>,
+  creates a release commit, and only then creates the annotated tag</li>
+<li><code>.githooks/pre-push</code> verifies that every pushed release tag still matches the
+  package version and blocks the push when they diverge</li>
+<li>changelog entries are managed through <code>changelog-cli</code>, which is installed as
+  part of <code>.[dev]</code></li>
+</ul>
+<p>To activate the repository-managed hooks locally:</p>
+<pre><code class="language-bash">make install-hooks
+</code></pre>
+<p>Useful <code>changelog-cli</code> commands:</p>
+<pre><code class="language-bash">changelog entry added --message &quot;Describe a new feature&quot;
+changelog entry changed --message &quot;Describe a behavior change&quot;
+changelog entry fixed --message &quot;Describe a bug fix&quot;
+changelog current
+</code></pre>
+<p>Once the package is published, installation from PyPI is:</p>
+<pre><code class="language-bash">python -m pip install OpenClaw-env-manager
+</code></pre>
+<p>On Debian and Ubuntu systems with <code>PEP 668</code> enabled, direct installation into
+the system Python may fail with <code>externally-managed-environment</code>. The safest
+installation options for the published CLI are:</p>
+<ol>
+<li><code>pipx</code> for a standalone CLI install:</li>
+</ol>
+<pre><code class="language-bash">apt update
+apt install -y pipx python3-venv
+pipx install OpenClaw-env-manager
+~/.local/bin/clawopenenv --help
+</code></pre>
+<ol>
+<li><code>virtualenv</code> for an isolated Python environment:</li>
+</ol>
+<pre><code class="language-bash">apt update
+apt install -y python3-venv
+python3 -m venv /opt/openclaw-env-manager
+source /opt/openclaw-env-manager/bin/activate
+pip install -U pip
+pip install OpenClaw-env-manager
+clawopenenv --help
+</code></pre>
+<p>The installed console command is:</p>
+<pre><code class="language-bash">clawopenenv
+</code></pre>
+<p>Before the first release, configure a PyPI Trusted Publisher for:</p>
+<ul>
+<li>owner: <code>fipciu1996</code></li>
+<li>repository: <code>OpenClaw-env-manager</code></li>
+<li>workflow: <code>.github/workflows/publish-pypi.yml</code></li>
+</ul>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
+<p>Project documentation is generated with <code>MkDocs + mkdocstrings</code> and uses the
+<code>mkdocs-shadcn</code> theme. The <code>docs/</code>
+directory holds narrative pages, while the API reference is generated directly
+from the internal Python package implementation. The MkDocs config also uses a
+small local hook so the <code>shadcn</code> theme does not require global Git
+<code>safe.directory</code> changes just to build docs.</p>
+<p>The docs also include a dedicated reference page for the generated
+<code>openclawenv.toml</code> structure, including the top-level sections, field meanings, and
+managed-bot file layout.</p>
+<p>Install the docs toolchain:</p>
+<pre><code class="language-bash">python -m pip install -e .[docs]
+</code></pre>
+<p>Build the docs locally:</p>
+<pre><code class="language-bash">python -m mkdocs build --strict
+</code></pre>
+<p>Run the local preview server:</p>
+<pre><code class="language-bash">python -m mkdocs serve
+</code></pre>
+<p>Equivalent <code>make</code> shortcuts:</p>
+<pre><code class="language-bash">make install-docs
+make docs-build
+make docs-serve
+</code></pre>
+<p>The latest documentation is also published from GitHub Actions to the <code>gh-pages</code>
+branch on pushes to <code>main</code>, and GitHub Pages serves that branch as the public
+site.</p>
+<p>Versioned documentation publishing remains configured for GitLab Pages in
+<code>.gitlab-ci.yml</code>. The GitLab deployment model is:</p>
+<ul>
+<li>default branch: published at the root Pages URL</li>
+<li>other branches: published under <code>branch-&lt;ref-slug&gt;/</code></li>
+<li>tags: published under <code>tag-&lt;ref-slug&gt;/</code></li>
+</ul>
+<p>This setup uses GitLab Pages parallel deployments through <code>pages.path_prefix</code>.
+According to the current GitLab documentation, that feature is available on
+GitLab Premium and Ultimate. Branch previews are configured to expire after
+<code>30 days</code>, while the default-branch and tag deployments are kept indefinitely.</p>
+<h2 id="host-prerequisites">Host Prerequisites<a class="headerlink" href="#host-prerequisites" title="Permanent link">&para;</a></h2>
+<p>Before using OpenClaw-env-manager on a workstation or CI runner, install:</p>
+<ul>
+<li>Docker with <code>docker compose</code> support</li>
+<li>Python <code>3.12+</code> with <code>pip</code></li>
+<li>optionally <code>git</code></li>
+<li>optionally <code>make</code> on Linux/macOS if you want to use the provided <code>Makefile</code></li>
+</ul>
+<p>Quick verification:</p>
+<pre><code class="language-bash">docker version
+docker compose version
+python --version
+python -m pip --version
+</code></pre>
+<p>Expected result: Docker CLI is available, <code>docker compose</code> works, and Python is
+at least <code>3.12</code>.</p>
+<h3 id="windows">Windows<a class="headerlink" href="#windows" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Install Docker Desktop for Windows:
+   <a href="https://docs.docker.com/desktop/setup/install/windows-install/">official Docker Desktop for Windows guide</a>.</li>
+<li>Prefer the WSL 2 backend. Docker's current documentation requires WSL
+   <code>2.1.5+</code> and a supported Windows 10/11 build.</li>
+<li>Install Python <code>3.12+</code> from
+   <a href="https://www.python.org/downloads/">python.org/downloads</a> or through the
+   Python Install Manager described in the
+   <a href="https://docs.python.org/3/using/windows.html">official Windows documentation</a>.</li>
+<li>Restart the terminal and verify:</li>
+</ol>
+<pre><code class="language-powershell">wsl --version
+docker version
+docker compose version
+python --version
+</code></pre>
+<h3 id="macos">macOS<a class="headerlink" href="#macos" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Install Docker Desktop for Mac:
+   <a href="https://docs.docker.com/desktop/setup/install/mac-install/">official Docker Desktop for Mac guide</a>.</li>
+<li>Install Python <code>3.12+</code> from
+   <a href="https://www.python.org/downloads/">python.org/downloads</a>. The official
+   macOS installer is a <code>universal2</code> build and works on both Apple Silicon and
+   Intel Macs.</li>
+<li>See the
+   <a href="https://docs.python.org/3/using/mac.html">official Python on macOS guide</a>
+   for installer details and shell path setup.</li>
+<li>Verify:</li>
+</ol>
+<pre><code class="language-bash">docker version
+docker compose version
+python3 --version
+python3 -m pip --version
+</code></pre>
+<h3 id="linux">Linux<a class="headerlink" href="#linux" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Install Docker Engine from the
+   <a href="https://docs.docker.com/engine/install/">official Docker Engine install overview</a>
+   and pick your distribution-specific page there. If you prefer Docker
+   Desktop and your distro is supported, see the
+   <a href="https://docs.docker.com/desktop/setup/install/linux/">official Docker Desktop for Linux guide</a>.</li>
+<li>For common distros, Docker maintains dedicated instructions for
+   <a href="https://docs.docker.com/engine/install/ubuntu/">Ubuntu</a> and
+   <a href="https://docs.docker.com/engine/install/debian/">Debian</a>, and the install
+   overview links the rest of the supported platforms.</li>
+<li>Check whether your distro already ships Python <code>3.12+</code>:</li>
+</ol>
+<pre><code class="language-bash">python3 --version
+</code></pre>
+<ol>
+<li>If your distro Python is older than <code>3.12</code>, use a newer distro package or
+   install CPython from the latest source release published on
+   <a href="https://www.python.org/downloads/">python.org/downloads</a>, following the
+   <a href="https://docs.python.org/3/using/unix.html">official Unix installation guide</a>.</li>
+<li>Verify:</li>
+</ol>
+<pre><code class="language-bash">docker version
+docker compose version
+python3 --version
+python3 -m pip --version
+</code></pre>
+<h3 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>OpenClaw-env-manager assumes a Docker environment with Compose available as
+  <code>docker compose</code>.</li>
+<li>On Linux, the Python executable is often <code>python3</code> rather than <code>python</code>.</li>
+<li>Docker Desktop licensing can require a paid subscription in larger
+  commercial organizations; check Docker's current terms before rolling it out
+  company-wide.</li>
+</ul>
+<h2 id="v1-scope">V1 Scope<a class="headerlink" href="#v1-scope" title="Permanent link">&para;</a></h2>
+<p>OpenClaw-env-manager v1 is intentionally narrow:</p>
+<ul>
+<li>OpenClaw-first</li>
+<li>Python-first</li>
+<li>one inline manifest</li>
+<li>Docker image output</li>
+<li>secret references only</li>
+<li>no session or auth state snapshotting</li>
+</ul>
+<p>The current locker accepts exact Python requirements only:</p>
+<ul>
+<li><code>package==version</code></li>
+<li><code>name @ URL</code></li>
+</ul>
+<p>It also accepts exact Node.js requirements only:</p>
+<ul>
+<li><code>package@version</code></li>
+<li><code>@scope/package@version</code></li>
+</ul>
+<p>That constraint keeps the lockfile deterministic without shipping a full Python
+dependency resolver in v1.</p>
+<p>OpenClaw-env-manager can also integrate with Cisco's
+<a href="https://github.com/cisco-ai-defense/skill-scanner">Skill Scanner</a>, which the
+upstream project describes as a best-effort scanner for agent skills with
+static, behavioral, and optional LLM-based analysis.</p>
+<p>Five catalog skills are treated as always installed defaults across manifests,
+managed bots, and generated images:</p>
+<ul>
+<li><code>deus-context-engine</code></li>
+<li><code>self-improving-agent</code></li>
+<li><code>skill-security-review</code></li>
+<li><code>freeride</code> (<code>free-ride</code> inside the workspace)</li>
+<li><code>agent-browser-clawdbot</code></li>
+</ul>
+<h2 id="security-notes">Security Notes<a class="headerlink" href="#security-notes" title="Permanent link">&para;</a></h2>
+<p>OpenClaw-env-manager follows a secure-by-default model, but it does not silently
+override explicit operator intent. Secure defaults are applied to newly
+generated manifests and artifacts, while consciously weaker settings remain
+available and are surfaced as non-blocking security advisories.</p>
+<p>Existing default mechanisms include:</p>
+<ul>
+<li><code>read_only_root = true</code> for newly generated OpenClaw sandbox configuration</li>
+<li>localhost-only binds for generated gateway and bridge ports</li>
+<li><code>cap_drop: [ALL]</code>, <code>no-new-privileges:true</code>, read-only root filesystems,
+  <code>tmpfs</code>, <code>pids_limit</code>, and <code>ulimits</code> in generated Compose services</li>
+<li>sidecar <code>.env</code> files for secrets so sensitive values are not baked into images</li>
+<li>build-time and preflight skill scanning with <code>cisco-ai-skill-scanner</code></li>
+<li>mandatory baseline skills that keep operational and security guardrails present</li>
+<li>warnings when the operator chooses riskier settings such as wildcard tool
+  policies, <code>shell_command</code> allowlists, unpinned base images, public host binds,
+  or writable root filesystems</li>
+</ul>
+<p>The default image/runtime baseline also includes a fixed starter set of skills
+and tools:</p>
+<ul>
+<li>mandatory skills: <code>deus-context-engine</code>, <code>self-improving-agent</code>,
+  <code>skill-security-review</code>, <code>freeride</code>, and <code>agent-browser-clawdbot</code></li>
+<li>default tooling in the image: <code>chromium</code>, <code>node</code>, <code>npm</code>, <code>npx</code>,
+  <code>agent-browser</code>, and <code>cisco-ai-skill-scanner</code></li>
+</ul>
+<p>That baseline is meant to make generated images immediately usable for OpenClaw
+execution, browser automation, and skill security checks, while still allowing
+the operator to add more Python, Node.js, and system dependencies through the
+manifest.</p>
+<p>Important boundary:</p>
+<ul>
+<li>these defaults reduce common mistakes, but they do not replace host-level
+  hardening. Docker daemon access, <code>docker.sock</code> mounts, firewalling, rootless
+  Docker, user namespaces, seccomp/AppArmor/SELinux, and patch management still
+  need to be handled operationally.</li>
+</ul>
+<p>The baseline is aligned with the
+<a href="https://github.com/OWASP/CheatSheetSeries">OWASP Cheat Sheet Series</a>,
+especially the
+<a href="https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html">Docker Security Cheat Sheet</a>
+and the
+<a href="https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html">AI Agent Security Cheat Sheet</a>.
+There is also a dedicated <code>Security Notes</code> page in this documentation set.</p>
+<h2 id="manifest-shape">Manifest Shape<a class="headerlink" href="#manifest-shape" title="Permanent link">&para;</a></h2>
+<p><code>openclawenv.toml</code> contains five top-level sections:</p>
+<ul>
+<li><code>project</code></li>
+<li><code>runtime</code></li>
+<li><code>agent</code></li>
+<li><code>skills</code></li>
+<li><code>openclaw</code></li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-toml">schema_version = 1
+
+[project]
+name = &quot;ops-agent&quot;
+version = &quot;1.2.3&quot;
+description = &quot;Deterministic OpenClaw image for operations support&quot;
+runtime = &quot;openclaw&quot;
+
+[runtime]
+base_image = &quot;python:3.12-slim&quot;
+python_version = &quot;3.12&quot;
+system_packages = [&quot;git&quot;, &quot;curl&quot;, &quot;chromium&quot;]
+python_packages = [&quot;requests==2.32.3&quot;, &quot;rich==13.9.4&quot;]
+node_packages = [&quot;typescript@5.8.3&quot;]
+env = { PYTHONUNBUFFERED = &quot;1&quot; }
+user = &quot;agent&quot;
+workdir = &quot;/workspace&quot;
+
+[[runtime.secret_refs]]
+name = &quot;OPENAI_API_KEY&quot;
+source = &quot;env:OPENAI_API_KEY&quot;
+required = true
+
+[agent]
+agents_md = &quot;&quot;&quot;# Agent Contract&quot;&quot;&quot;
+soul_md = &quot;&quot;&quot;# Soul&quot;&quot;&quot;
+user_md = &quot;&quot;&quot;# User&quot;&quot;&quot;
+memory_seed = [&quot;Remember the operating model.&quot;]
+
+[[skills]]
+name = &quot;incident-brief&quot;
+description = &quot;Prepare concise incident reports.&quot;
+content = &quot;&quot;&quot;
+---
+name: incident-brief
+description: Prepare concise incident reports.
+---
+&quot;&quot;&quot;
+
+[openclaw]
+agent_id = &quot;main&quot;
+agent_name = &quot;Operations Agent&quot;
+
+[openclaw.sandbox]
+mode = &quot;workspace-write&quot;
+scope = &quot;session&quot;
+workspace_access = &quot;full&quot;
+network = &quot;none&quot;
+read_only_root = true
+</code></pre>
+<p>The <code>agent</code> section supports both inline markdown content and relative <code>.md</code>
+file references. For example, <code>agents_md = "AGENTS.md"</code> will load
+<code>AGENTS.md</code> from the same directory as <code>openclawenv.toml</code>.</p>
+<p>Even if they are not declared manually, OpenClaw-env-manager normalizes manifests so that
+<code>deus-context-engine</code>, <code>self-improving-agent</code>, <code>skill-security-review</code>,
+<code>freeride</code>, and <code>agent-browser-clawdbot</code> remain present in the effective skill
+set. <code>openenv init</code> writes them explicitly into the starter manifest.</p>
+<p>Security-sensitive defaults are also generated automatically:
+- <code>read_only_root = true</code> for the OpenClaw sandbox by default
+- explicit <code>openclaw.tools.allow</code> / <code>deny</code> lists by default, while risky
+  wildcard or broad tool scopes remain possible as explicit operator choices
+  and are surfaced as security warnings
+- localhost-only host port bindings in generated Compose files
+- <code>cap_drop: [ALL]</code>, <code>no-new-privileges</code>, read-only root filesystems, <code>tmpfs</code>,
+  and process/file descriptor limits in generated Compose services</p>
+<p>These defaults are intentionally aligned with the
+<a href="https://github.com/OWASP/CheatSheetSeries">OWASP Cheat Sheet Series</a>,
+especially the official
+<a href="https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html">Docker Security Cheat Sheet</a>
+and
+<a href="https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html">AI Agent Security Cheat Sheet</a>.
+OpenClaw-env-manager uses them as the baseline for generated images, Compose
+stacks, tool scoping, and agent runtime guardrails. The project keeps a
+secure-by-default posture without silently overriding explicit operator intent:
+if a manifest or runtime override weakens the baseline, <code>validate</code>, <code>export</code>,
+and <code>build</code> flows emit clear non-blocking security warnings instead of
+preventing the change outright.</p>
+<h2 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h2>
+<p>Create a starter manifest:</p>
+<pre><code class="language-bash">clawopenenv init
+</code></pre>
+<p>Open the interactive bot menu:</p>
+<pre><code class="language-bash">clawopenenv
+</code></pre>
+<p>Validate the manifest:</p>
+<pre><code class="language-bash">clawopenenv validate
+</code></pre>
+<p>Generate the lockfile:</p>
+<pre><code class="language-bash">clawopenenv lock
+</code></pre>
+<p>Run a skill security scan:</p>
+<pre><code class="language-bash">clawopenenv scan -- --policy strict --fail-on-severity high
+</code></pre>
+<p>Build the image with a stricter build-time scan policy:</p>
+<pre><code class="language-bash">clawopenenv build --scan-policy strict --scan-fail-on-severity medium
+</code></pre>
+<p>Export the Dockerfile:</p>
+<pre><code class="language-bash">clawopenenv export dockerfile --output Dockerfile
+</code></pre>
+<p>Export the bot compose file:</p>
+<pre><code class="language-bash">clawopenenv export compose
+</code></pre>
+<p><code>clawopenenv export compose</code> also writes a sibling <code>Dockerfile</code>, so the generated
+compose bundle can rebuild the bot image locally without any extra wiring.</p>
+<p>Build the image:</p>
+<pre><code class="language-bash">clawopenenv build
+</code></pre>
+<p><code>clawopenenv build</code> also writes a compose file named after the bot, for example
+<code>docker-compose-operations-agent.yml</code>, next to the manifest.
+When <code>runtime.base_image</code> is not pinned with <code>@sha256</code>, OpenClaw-env-manager first checks
+for the image locally and automatically tries <code>docker image pull &lt;image&gt;</code> if it
+is missing before failing lock generation.</p>
+<p>Module-oriented execution is also available through:</p>
+<pre><code class="language-bash">python -m clawopenenv
+</code></pre>
+<h2 id="makefile">Makefile<a class="headerlink" href="#makefile" title="Permanent link">&para;</a></h2>
+<p>Common workflows are also available through <code>Makefile</code> targets:</p>
+<pre><code class="language-bash">make install
+make install-dev
+make install-scan
+make test
+make coverage
+make coverage-html
+make menu
+make validate
+make lock
+make scan SCAN_ARGS=&quot;-- --policy strict --fail-on-severity high&quot;
+make dockerfile
+make compose
+make build
+</code></pre>
+<p>You can override defaults, for example:</p>
+<pre><code class="language-bash">make lock MANIFEST=examples/demo.openclawenv.toml LOCKFILE=examples/demo.openclawenv.lock
+make dockerfile DOCKERFILE=build/Dockerfile
+make build TAG=openclawenv/demo:dev
+</code></pre>
+<h2 id="interactive-bot-menu">Interactive Bot Menu<a class="headerlink" href="#interactive-bot-menu" title="Permanent link">&para;</a></h2>
+<p>Running <code>clawopenenv</code> without parameters opens a menu that lets you:</p>
+<ul>
+<li>choose Polish or English as the interface language on entry</li>
+<li>list managed bots</li>
+<li>from the bot selection screen, generate a shared stack at
+  <code>bots/all-bots-compose.yml</code> with one gateway and one bot service per managed
+  bot</li>
+<li>open a listed bot and generate <code>openclawenv.lock</code>, <code>Dockerfile</code>, and bot-specific
+  <code>docker-compose</code> artifacts</li>
+<li>open a listed bot and improve its <code>*.md</code> documents through OpenRouter
+  tool calling, with the resulting markdown normalized to consistent English</li>
+<li>list running bots launched from <code>bots/&lt;bot-slug&gt;/docker-compose-*.yml</code></li>
+<li>open a running bot and preview recent container logs</li>
+<li>open a running bot and create a skill snapshot, which inspects installed
+  skills in the running container and updates <code>openclawenv.toml</code> with any new
+  discoveries</li>
+<li>add a new bot by answering interactive questions about role, skill sources,
+  dependencies, secrets, sites, and databases</li>
+<li>the interactive skill prompt only asks for additional skills, because
+  <code>deus-context-engine</code>, <code>self-improving-agent</code>, <code>skill-security-review</code>,
+  <code>freeride</code>, and <code>agent-browser-clawdbot</code> are always included automatically</li>
+<li>edit an existing bot and rewrite its stored manifest data</li>
+<li>delete an existing bot together with its stored manifest data</li>
+</ul>
+<p>Managed bots are stored under <code>bots/&lt;bot-slug&gt;/openclawenv.toml</code>.
+For bots created from the interactive menu, secret refs are stored in
+<code>bots/&lt;bot-slug&gt;/.env</code> instead of <code>[[runtime.secret_refs]]</code> blocks inside the
+manifest. Agent documents are stored as sibling markdown files such as
+<code>bots/&lt;bot-slug&gt;/AGENTS.md</code>, <code>SOUL.md</code>, <code>USER.md</code>, <code>IDENTITY.md</code>, <code>TOOLS.md</code>,
+and <code>memory.md</code>, while the manifest keeps only relative references to those
+files. The OpenRouter-backed document improvement action looks for
+<code>OPENROUTER_API_KEY</code> in the system environment first and then in the project
+root <code>.env</code>. If the key is missing and the action is selected, the menu prompts
+for it and writes <code>OPENROUTER_API_KEY=...</code> to the project root <code>.env</code>.</p>
+<h2 id="generated-image-contents">Generated Image Contents<a class="headerlink" href="#generated-image-contents" title="Permanent link">&para;</a></h2>
+<p>The generated image writes:</p>
+<ul>
+<li>the OpenClaw gateway/runtime itself by building on top of
+  <code>alpine/openclaw:main</code>, so the resulting image can actually run
+  <code>node dist/index.js gateway</code></li>
+<li>the OpenClaw workspace files such as <code>AGENTS.md</code>, <code>SOUL.md</code>, and <code>USER.md</code></li>
+<li>inline skills under <code>&lt;workspace&gt;/skills/&lt;skill-name&gt;/</code></li>
+<li>a generated <code>openclaw.json</code></li>
+<li>copies of <code>openclawenv.toml</code> and <code>openclawenv.lock</code> under <code>/opt/openclawenv</code></li>
+<li>Python plus Node.js tooling available in the image, including <code>node</code>, <code>npm</code>,
+  and <code>npx</code></li>
+<li>exact <code>runtime.node_packages</code> installed globally with <code>npm install --global</code></li>
+<li>the <code>agent-browser</code> CLI installed globally by default, followed by
+  <code>agent-browser install</code> during image build so the browser runtime is prepared</li>
+<li>the <code>cisco-ai-skill-scanner==2.0.4</code> CLI installed in the image for in-container
+  skill scanning</li>
+<li>Python packages installed into an image-local virtual environment under
+  <code>/opt/openclawenv/.venv</code>, which keeps Docker builds compatible with
+  <code>PEP 668</code> system Python protections</li>
+<li>the <code>freeride</code> skill installed from ClawHub into the real OpenClaw workspace
+  and exposed through <code>~/.openclaw -&gt; /opt/openclaw</code>, so <code>freeride auto</code> updates
+  the same <code>openclaw.json</code> used by the container</li>
+<li>a build-time <code>skill-scanner scan-all</code> gate against <code>&lt;workspace&gt;/skills</code>, using
+  <code>balanced</code> policy and failing on <code>high</code> severity by default</li>
+</ul>
+<p><code>runtime.base_image</code> is still preserved and pinned in <code>openclawenv.lock</code>, but it is
+used as the sandbox/agent image inside the generated <code>openclaw.json</code>, not as
+the outer gateway container base.</p>
+<p>The tool can also generate a bot-specific OpenClaw-style compose file with
+<code>openclaw-gateway</code> and <code>openclaw-cli</code> services, host-mounted config/workspace
+directories, and a bot-specific env file such as <code>.operations-agent.env</code>. The
+gateway service includes a <code>build:</code> section that rebuilds the local image from
+the adjacent generated <code>Dockerfile</code>, and both services use the resulting tag
+through <code>OPENCLAW_IMAGE</code>. When a canonical sidecar <code>bots/&lt;bot-slug&gt;/.env</code> file
+exists, its secret values are merged into the generated compose env file
+together with OpenClaw defaults such as image tag, ports, bind mode, and
+workspace paths.</p>
+<p>When <code>clawopenenv scan</code> is used, the CLI materializes skills to a temporary
+directory and runs <code>skill-scanner scan-all ... --recursive</code> against that tree
+as a local preflight check. During <code>docker build</code>, the generated Dockerfile also
+runs <code>skill-scanner scan-all &lt;workspace&gt;/skills --recursive --check-overlap</code>,
+so the image build fails when findings meet the configured severity threshold.
+For already running bot containers, the interactive menu can also create a
+skill snapshot by inspecting <code>&lt;workspace&gt;/skills</code> inside the container and
+merging any newly discovered skills back into the bot manifest.
+When <code>freeride</code> is present, the Docker build also runs
+<code>npx clawhub@latest install freeride</code> plus <code>python -m pip install -e</code> for the
+installed <code>free-ride</code> package before the skill scan gate. After container start,
+set <code>OPENROUTER_API_KEY</code> and run <code>freeride auto</code> followed by
+<code>openclaw gateway restart</code> if you want FreeRide to rewrite the active
+OpenClaw model configuration.
+By default, Docker builds also run <code>npm install -g agent-browser</code> and
+<code>agent-browser install</code> to prepare browser automation, while the mandatory
+<code>agent-browser-clawdbot</code> skill documents how agents should use that tool.
+When using the exported Dockerfile directly, you can override the defaults with
+Docker build args such as <code>OPENCLAWENV_SKILL_SCAN_POLICY=strict</code>,
+<code>OPENCLAWENV_SKILL_SCAN_FORMAT=json</code>, and
+<code>OPENCLAWENV_SKILL_SCAN_FAIL_ON_SEVERITY=medium</code>. Use <code>--keep-artifacts</code> if you
+want to inspect the materialized skill bundle in <code>.openclawenv-scan/</code>.</p>
+<p>Example GitHub Actions step for the exported Dockerfile:</p>
+<pre><code class="language-yaml">- name: Build OpenClaw-env-manager image with skill scan gate
+  run: |
+    docker build \
+      --file Dockerfile \
+      --tag openclawenv/agent:ci \
+      --build-arg OPENCLAWENV_SKILL_SCAN_POLICY=strict \
+      --build-arg OPENCLAWENV_SKILL_SCAN_FAIL_ON_SEVERITY=medium \
+      .
+</code></pre>
+<p>Secrets are never baked into the image. Sensitive values must be supplied at
+runtime through the generated <code>.&lt;bot-name&gt;.env</code> file.</p>
+<h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
+<p>Run the built-in unittest suite:</p>
+<pre><code class="language-bash">python -m unittest discover -s tests -t . -v
+</code></pre>
+<p>Generate a terminal coverage report:</p>
+<pre><code class="language-bash">python -m coverage run -m unittest discover -s tests -t . -v
+python -m coverage report -m
+</code></pre>
+<p>Generate the HTML report under <code>htmlcov/</code>:</p>
+<pre><code class="language-bash">make coverage-html
+</code></pre>
+  </div>
+  
+  <script>
+    document.querySelectorAll('article h2, article h3').forEach((header) => {
+      toc.observer.observe(header);
+    });
+  </script>
+</article>
+                                <div class="mx-auto flex flex-wrap h-16 w-full max-w-2xl items-center gap-2 px-4 md:px-0">
+    
+    
+    <a data-slot="button"
+        class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-secondary text-secondary-foreground hover:bg-secondary/80 h-8 rounded-md gap-1.5 px-3 has-[&gt;svg]:px-2.5 ml-auto shadow-none"
+        href="None">
+        <span class="max-[500px]:hidden">Getting Started</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="tabler-icon tabler-icon-arrow-right ">
+            <path d="M5 12l14 0"></path>
+            <path d="M13 18l6 -6"></path>
+            <path d="M13 6l6 6"></path>
+        </svg>
+    </a>
+    
+</div>
+                                <dialog id="bottom-sidebar" onclick="onBottomSidebarDialogClick(event)" class="bg-transparent"
+    style="position: fixed; left: 0px; top: 0px; transform: translate(0px, 58px); min-width: max-content; --radix-popper-transform-origin: 0% 0px; will-change: transform; z-index: 50; --radix-popper-available-width: 504px; --radix-popper-available-height: 857px; --radix-popper-anchor-width: 72.94999694824219px; --radix-popper-anchor-height: 32px;">
+    <div data-side="bottom" data-align="start" data-state="open" role="dialog" data-slot="popover-content"
+        class="text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 origin-(--radix-popover-content-transform-origin) border outline-hidden bg-background/90 no-scrollbar h-(--radix-popper-available-height) w-(--radix-popper-available-width) overflow-y-auto rounded-none border-none p-0 shadow-none backdrop-blur duration-100"
+        style="--radix-popover-content-transform-origin: var(--radix-popper-transform-origin); --radix-popover-content-available-width: var(--radix-popper-available-width); --radix-popover-content-available-height: var(--radix-popper-available-height); --radix-popover-trigger-width: var(--radix-popper-anchor-width); --radix-popover-trigger-height: var(--radix-popper-anchor-height);"
+        tabindex="-1">
+        <div class="flex flex-col gap-12 overflow-auto px-6 py-6">
+            
+            
+            
+
+            
+            <div class="flex flex-col gap-4">
+                <div class="text-muted-foreground text-sm font-medium">Menu</div>
+                <div class="flex flex-col gap-3">
+                    
+                    <a class="text-2xl font-medium" href=".">
+                        
+                        Overview
+                        
+                    </a>
+                    
+                    <a class="text-2xl font-medium" href="getting-started/">
+                        
+                        Getting Started
+                        
+                    </a>
+                    
+                    <a class="text-2xl font-medium" href="concepts/">
+                        
+                        Concepts
+                        
+                    </a>
+                    
+                    <a class="text-2xl font-medium" href="security/">
+                        
+                        Security Notes
+                        
+                    </a>
+                    
+                    <a class="text-2xl font-medium" href="openclawenv-toml/">
+                        
+                        openclawenv.toml Structure
+                        
+                    </a>
+                    
+                    <a class="text-2xl font-medium" href="changelog/">
+                        
+                        Changelog
+                        
+                    </a>
+                    
+                </div>
+            </div>
+            
+
+            
+            <div class="flex flex-col gap-8">
+                
+                <div class="flex flex-col gap-4">
+                    <div class="text-muted-foreground text-sm font-medium">API</div>
+                    
+                    <div class="flex flex-col gap-3">
+                        
+                        <a class="text-2xl font-medium" href="api/">
+                            
+                            Overview
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="api/cli/">
+                            
+                            CLI
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="api/manifests/">
+                            
+                            Manifests
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="api/docker/">
+                            
+                            Docker
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="api/bots/">
+                            
+                            Bots
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="api/integrations/">
+                            
+                            Integrations
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="api/envfiles/">
+                            
+                            Env Files
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="api/core/">
+                            
+                            Core
+                            
+                        </a>
+                        
+                        <a class="text-2xl font-medium" href="api/templates/">
+                            
+                            Templates
+                            
+                        </a>
+                        
+                    </div>
+                    
+                </div>
+                
+            </div>
+            
+            
+
+        </div>
+    </div>
+</dialog>
+                            </div>
+                            <div
+                                class="sticky top-[calc(var(--header-height)+1px)] ml-auto hidden h-[calc(100svh-var(--header-height)-var(--footer-height))] w-72 flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex">
+                                <div class="h-(--top-spacing) shrink-0"></div>
+                                <div id="toc" view-transition-name="toc" class="no-scrollbar overflow-y-auto px-8">
+    <div class="flex flex-col gap-2 p-4 pt-0 text-sm">
+        <p class="text-muted-foreground bg-background sticky top-0 h-6 text-xs">On This Page</p>
+        
+        
+        
+        
+        <a href="#table-of-contents"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#table-of-contents');">
+            Table Of Contents
+        </a>
+        
+
+        
+        <a href="#ci-and-coverage"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#ci-and-coverage');">
+            CI And Coverage
+        </a>
+        
+
+        
+        <a href="#releases-and-pypi"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#releases-and-pypi');">
+            Releases And PyPI
+        </a>
+        
+
+        
+        <a href="#documentation"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#documentation');">
+            Documentation
+        </a>
+        
+
+        
+        <a href="#host-prerequisites"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#host-prerequisites');">
+            Host Prerequisites
+        </a>
+        
+        
+        <a href="#windows"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#windows');">
+            Windows
+        </a>
+        
+        <a href="#macos"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#macos');">
+            macOS
+        </a>
+        
+        <a href="#linux"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#linux');">
+            Linux
+        </a>
+        
+        <a href="#notes"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="3" onClick="deferSetActiveTocLink('#notes');">
+            Notes
+        </a>
+        
+        
+
+        
+        <a href="#v1-scope"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#v1-scope');">
+            V1 Scope
+        </a>
+        
+
+        
+        <a href="#security-notes"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#security-notes');">
+            Security Notes
+        </a>
+        
+
+        
+        <a href="#manifest-shape"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#manifest-shape');">
+            Manifest Shape
+        </a>
+        
+
+        
+        <a href="#cli"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#cli');">
+            CLI
+        </a>
+        
+
+        
+        <a href="#makefile"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#makefile');">
+            Makefile
+        </a>
+        
+
+        
+        <a href="#interactive-bot-menu"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#interactive-bot-menu');">
+            Interactive Bot Menu
+        </a>
+        
+
+        
+        <a href="#generated-image-contents"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#generated-image-contents');">
+            Generated Image Contents
+        </a>
+        
+
+        
+        <a href="#tests"
+            class="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            data-active="false" data-depth="2" onClick="deferSetActiveTocLink('#tests');">
+            Tests
+        </a>
+        
+
+        
+        
+        
+        
+
+    </div>
+    <div class="h-12"></div>
+
+</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer view-transition-name="footer"
+    class="group-has-[.section-soft]/body:bg-surface/40 3xl:fixed:bg-transparent dark:bg-transparent">
+    <div class="container-wrapper px-4 xl:px-6">
+        <div class="flex h-(--footer-height) items-center justify-between">
+            <div class="text-muted-foreground w-full text-center text-xs leading-loose sm:text-sm">
+                
+                <a href="https://github.com/asiffer/mkdocs-shadcn">shadcn theme</a> provided by
+                <a href="https://github.com/asiffer">@asiffer</a>
+            </div>
+        </div>
+    </div>
+</footer>
+    </div>
+     
+
+<script src="search/main.js"></script>
+
+
+    
+
+    <script src="js/copy-button.js"></script>
+    <script>updatePygmentsStylesheet();</script>
+    
+    <script>fetchStargazers("https://github.com/fipciu1996/OpenClaw-env-manager");</script>
+    
+    
+    <script>
+    for (const el of document.querySelectorAll(
+        ".typography .doc code.language-python",
+    )) {
+        el.classList.add("codehilite");
+    }
+
+    for (const el of document.querySelectorAll("article .doc .doc-contents")) {
+        el.innerHTML = el.innerHTML.trim();
+    }
+</script>
+    
+    
+    <script type="speculationrules">
+{
+  "prerender": [
+    {
+      "where": {
+          "selector_matches": ["#next-button", "#previous-button"]
+      }
+    }
+  ]
+}
+</script>
+</body>
+
+</html>
