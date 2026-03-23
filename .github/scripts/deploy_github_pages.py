@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import tempfile
@@ -13,10 +14,14 @@ BOT_NAME = "github-actions[bot]"
 BOT_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com"
 
 
-def run_git(*args: str, cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess[str]:
+def run_git(
+    *args: str,
+    cwd: Path | None = None,
+    check: bool = True,
+) -> subprocess.CompletedProcess[str]:
     """Run a git command and return its completed process object."""
     return subprocess.run(
-        ["git", *args],
+        ["git", *_git_auth_config_args(), *args],
         cwd=cwd,
         check=check,
         text=True,
@@ -52,18 +57,35 @@ def remote_url() -> str:
     return run_git("remote", "get-url", "origin").stdout.strip()
 
 
+def _git_auth_config_args() -> list[str]:
+    """Return transient git config overrides needed to reuse checkout credentials."""
+    try:
+        completed = subprocess.run(
+            ["git", "config", "--get-regexp", r"^http\..*\.extraheader$"],
+            check=True,
+            text=True,
+            capture_output=True,
+        )
+    except subprocess.CalledProcessError:
+        return []
+
+    args: list[str] = []
+    for line in completed.stdout.splitlines():
+        key, _, value = line.partition(" ")
+        if not key or not value:
+            continue
+        args.extend(["-c", f"{key}={value}"])
+    return args
+
+
 def clone_target_branch(remote: str, branch: str, target_dir: Path) -> None:
     """Clone the publish branch when it already exists or bootstrap a fresh orphan branch."""
     probe = run_git("ls-remote", "--heads", remote, branch, check=False)
     if probe.returncode == 0 and probe.stdout.strip():
-        subprocess.run(
-            ["git", "clone", "--depth", "1", "--branch", branch, remote, str(target_dir)],
-            check=True,
-            text=True,
-        )
+        run_git("clone", "--depth", "1", "--branch", branch, remote, str(target_dir))
         return
 
-    subprocess.run(["git", "clone", remote, str(target_dir)], check=True, text=True)
+    run_git("clone", remote, str(target_dir))
     run_git("checkout", "--orphan", branch, cwd=target_dir)
     for entry in target_dir.iterdir():
         if entry.name == ".git":
@@ -116,6 +138,11 @@ def main() -> None:
     site_dir = Path(args.site_dir).resolve()
     if not site_dir.is_dir():
         raise SystemExit(f"Site directory {site_dir} does not exist.")
+    if os.environ.get("GITHUB_ACTIONS") == "true" and not _git_auth_config_args():
+        raise SystemExit(
+            "GitHub Actions checkout credentials were not found. "
+            "Ensure actions/checkout runs before the deploy step and keeps credentials enabled."
+        )
 
     with tempfile.TemporaryDirectory(prefix="github-pages-") as temp_dir:
         target_dir = Path(temp_dir)
