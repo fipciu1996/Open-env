@@ -14,11 +14,17 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### New
 
 ### Changes
-* Updated repository URLs, badges, docs branding, and release metadata defaults to use the renamed GitHub repository OpenClaw-env-manager.
 
 ### Fixes
 
 ### Breaks
+
+
+## 1.1.1 - (2026-03-23)
+---
+
+### Changes
+* Updated repository URLs, badges, docs branding, and release metadata defaults to use the renamed GitHub repository OpenClaw-env-manager.
 
 
 ## 1.1.0 - (2026-03-23)
