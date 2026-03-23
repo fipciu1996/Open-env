@@ -1,5 +1,6 @@
 site_name: OpenClaw-env-manager
 site_description: Declarative OpenClaw environments, manifests, Docker generation, and bot operations.
+site_url: https://fipciu1996.github.io/OpenClaw-env-manager/
 repo_url: https://github.com/fipciu1996/OpenClaw-env-manager
 repo_name: fipciu1996/OpenClaw-env-manager
 hooks:

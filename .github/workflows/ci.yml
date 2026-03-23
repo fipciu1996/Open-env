@@ -86,6 +86,11 @@ jobs:
           python .github/scripts/build_coverage_site.py
           cat .coverage-summary.md >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4.0.0
+        with:
+          path: site
+
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v6.0.0
         with:
@@ -106,26 +111,16 @@ jobs:
       - coverage
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     permissions:
-      contents: write
+      pages: write
+      id-token: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6.0.2
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5.0.0
 
-      - name: Set up Python
-        uses: actions/setup-python@v6.2.0
-        with:
-          python-version: "3.12"
-
-      - name: Download generated site artifact
-        uses: actions/download-artifact@v7.0.0
-        with:
-          name: coverage-report
-          path: _site-artifacts
-
-      - name: Deploy site to gh-pages
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
-        run: python .github/scripts/deploy_github_pages.py --site-dir _site-artifacts/site --branch gh-pages
+      - name: Deploy GitHub Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4.0.5

@@ -14,6 +14,8 @@ with [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### New
 
 ### Changes
+* Switched the GitHub Pages publication flow back to the native GitHub Actions Pages artifact deployment model and removed the temporary branch-based publisher.
+* Added an explicit MkDocs `site_url` so the published documentation generates project-page URLs for the `OpenClaw-env-manager` GitHub Pages site.
 
 ### Fixes
 

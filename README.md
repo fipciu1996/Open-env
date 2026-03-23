@@ -48,7 +48,7 @@ pushes to `main`. The same deployed Pages site also contains the HTML coverage
 report plus the generated coverage badge.
 
 Once GitHub Pages is enabled for the repository with `Build and deployment`
-configured to `Deploy from a branch` and branch `gh-pages` at `/ (root)`, the
+configured to `GitHub Actions`, the
 published docs site is available at
 [fipciu1996.github.io/OpenClaw-env-manager/](https://fipciu1996.github.io/OpenClaw-env-manager/),
 while the coverage report stays under
@@ -184,9 +184,8 @@ make docs-build
 make docs-serve
 ```
 
-The latest documentation is also published from GitHub Actions to the `gh-pages`
-branch on pushes to `main`, and GitHub Pages serves that branch as the public
-site.
+The latest documentation is also published from GitHub Actions directly through
+the repository's GitHub Pages workflow on pushes to `main`.
 
 Versioned documentation publishing remains configured for GitLab Pages in
 `.gitlab-ci.yml`. The GitLab deployment model is:

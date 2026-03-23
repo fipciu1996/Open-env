@@ -56,5 +56,5 @@ coverage. On pushes to `main`, the published GitHub Pages site serves:
 - the MkDocs site at the repository root
 - the HTML coverage report under `/coverage/`
 
-To make that deployment visible publicly, configure GitHub Pages to serve the
-`gh-pages` branch from `/ (root)`.
+To make that deployment visible publicly, configure GitHub Pages to use
+`GitHub Actions` as the build and deployment source.
