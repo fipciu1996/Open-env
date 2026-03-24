@@ -109,7 +109,7 @@ SAMPLE_MANIFEST = dedent(
     state_dir = "/opt/openclaw"
 
     [openclaw.sandbox]
-    mode = "workspace-write"
+    mode = "off"
     scope = "session"
     workspace_access = "full"
     network = "bridge"
@@ -118,5 +118,15 @@ SAMPLE_MANIFEST = dedent(
     [openclaw.tools]
     allow = ["shell_command"]
     deny = []
+
+    # Optional: declare raw channel config here so Claw-env writes it directly into
+    # openclaw.json and you can avoid the upstream form editor for complex schemas.
+    #
+    # [openclaw.channels.telegram]
+    # enabled = true
+    # allowFrom = ["123456789"]
+    #
+    # [openclaw.channels.googlechat.accounts.workspace]
+    # serviceAccountFile = "/opt/secrets/googlechat.json"
     """
 )

@@ -95,6 +95,7 @@ class BotManagerTests(unittest.TestCase):
         self.assertIn('identity_md = "IDENTITY.md"', text)
         self.assertIn('tools_md = "TOOLS.md"', text)
         self.assertIn('memory_seed = "memory.md"', text)
+        self.assertIn('mode = "off"', text)
         self.assertNotIn("# Agent Contract", text)
         self.assertTrue((self.work_dir / "bots" / "publisher-bot" / "AGENTS.md").exists())
         self.assertTrue((self.work_dir / "bots" / "publisher-bot" / "SOUL.md").exists())
@@ -188,6 +189,53 @@ class BotManagerTests(unittest.TestCase):
         self.assertIn("OPENAI_API_KEY=already-set", updated_env)
         self.assertIn("ANALYTICS_TOKEN=", updated_env)
 
+    def test_update_bot_preserves_manual_channel_config(self) -> None:
+        record = create_bot(
+            self.work_dir,
+            BotAnswers(
+                display_name="Publisher Bot",
+                role="Publikacja tresci",
+                skill_sources=[],
+                system_packages=[],
+                python_packages=[],
+                node_packages=[],
+                secret_names=[],
+                websites=[],
+                databases=[],
+                access_notes=[],
+            ),
+        )
+        manifest = record.manifest
+        manifest.openclaw.channels = {
+            "telegram": {
+                "enabled": True,
+                "allowFrom": ["123456"],
+            }
+        }
+        record.manifest_path.write_text(render_manifest(manifest), encoding="utf-8")
+
+        updated = update_bot(
+            self.work_dir,
+            "publisher-bot",
+            BotAnswers(
+                display_name="Publisher Bot",
+                role="Publikacja i analityka",
+                skill_sources=[],
+                system_packages=[],
+                python_packages=[],
+                node_packages=[],
+                secret_names=[],
+                websites=[],
+                databases=[],
+                access_notes=[],
+            ),
+        )
+
+        self.assertEqual(
+            updated.manifest.openclaw.channels,
+            {"telegram": {"enabled": True, "allowFrom": ["123456"]}},
+        )
+
     def test_delete_bot_removes_directory(self) -> None:
         record = create_bot(
             self.work_dir,
@@ -259,6 +307,11 @@ class BotManagerTests(unittest.TestCase):
         )
         self.assertTrue((artifacts.bot.manifest_path.parent / ".openclaw" / "openclaw.json").exists())
         self.assertTrue((artifacts.bot.manifest_path.parent / "workspace" / "AGENTS.md").exists())
+        openclaw_config_text = (
+            artifacts.bot.manifest_path.parent / ".openclaw" / "openclaw.json"
+        ).read_text(encoding="utf-8")
+        self.assertIn('"mode": "off"', openclaw_config_text)
+        self.assertNotIn('"backend": "docker"', openclaw_config_text)
 
     def test_generate_all_bots_stack_writes_shared_compose(self) -> None:
         create_bot(
@@ -310,6 +363,7 @@ class BotManagerTests(unittest.TestCase):
         self.assertIn('context: "./bundle-bot"', stack_text)
         self.assertIn('context: "./docs-bot"', stack_text)
         self.assertIn('      - "./.all-bots.env"', stack_text)
+        self.assertIn('HOME: "/opt/openclaw"', stack_text)
         self.assertIn('OPENCLAW_CONFIG_PATH: "/opt/openclaw/.openclaw/openclaw.json"', stack_text)
         self.assertIn('OPENCLAW_STATE_DIR: "/opt/openclaw/.openclaw"', stack_text)
         self.assertIn('"./.all-bots:/opt/openclaw"', stack_text)
@@ -318,6 +372,8 @@ class BotManagerTests(unittest.TestCase):
         self.assertTrue(shared_config_path.exists())
         shared_config_text = shared_config_path.read_text(encoding="utf-8")
         self.assertIn('"token": "${OPENCLAW_GATEWAY_TOKEN}"', shared_config_text)
+        self.assertIn('"mode": "off"', shared_config_text)
+        self.assertNotIn('"backend": "docker"', shared_config_text)
         self.assertIn('"/opt/openclaw/workspace/bundle-bot"', shared_config_text)
         self.assertIn('"/opt/openclaw/workspace/docs-bot"', shared_config_text)
         self.assertTrue(
@@ -326,6 +382,176 @@ class BotManagerTests(unittest.TestCase):
         self.assertTrue(
             (self.work_dir / "bots" / ".all-bots" / "workspace" / "docs-bot" / "AGENTS.md").exists()
         )
+
+    def test_generate_all_bots_stack_preserves_shared_state_and_seeds_agent_auth(self) -> None:
+        create_bot(
+            self.work_dir,
+            BotAnswers(
+                display_name="Bundle Bot",
+                role="Generowanie artefaktow",
+                skill_sources=[],
+                system_packages=[],
+                python_packages=[],
+                node_packages=[],
+                secret_names=[],
+                websites=[],
+                databases=[],
+                access_notes=[],
+            ),
+        )
+        shared_root = self.work_dir / "bots" / ".all-bots"
+        shared_main_agent_dir = shared_root / ".openclaw" / "agents" / "main" / "agent"
+        shared_main_agent_dir.mkdir(parents=True, exist_ok=True)
+        auth_payload = (
+            '{"version":1,"profiles":{"anthropic:default":'
+            '{"type":"api_key","provider":"anthropic","key":"test-key"}}}\n'
+        )
+        models_payload = '{"version":1,"providers":{}}\n'
+        preserved_state_path = shared_root / ".openclaw" / "exec-approvals.json"
+        preserved_workspace_path = shared_root / "workspace" / "bundle-bot" / "notes.txt"
+        (shared_main_agent_dir / "auth-profiles.json").write_text(auth_payload, encoding="utf-8")
+        (shared_main_agent_dir / "models.json").write_text(models_payload, encoding="utf-8")
+        preserved_state_path.parent.mkdir(parents=True, exist_ok=True)
+        preserved_state_path.write_text('{"preserve":true}\n', encoding="utf-8")
+        preserved_workspace_path.parent.mkdir(parents=True, exist_ok=True)
+        preserved_workspace_path.write_text("keep me\n", encoding="utf-8")
+
+        with patch(
+            "openenv.bots.manager.build_lockfile",
+            side_effect=self._build_stub_lockfile,
+        ):
+            generate_all_bots_stack(self.work_dir)
+
+        agent_root = (
+            self.work_dir
+            / "bots"
+            / ".all-bots"
+            / ".openclaw"
+            / "agents"
+            / "bundle-bot"
+            / "agent"
+        )
+        self.assertEqual(
+            (agent_root / "auth-profiles.json").read_text(encoding="utf-8"),
+            auth_payload,
+        )
+        self.assertEqual(
+            (agent_root / "models.json").read_text(encoding="utf-8"),
+            models_payload,
+        )
+        self.assertEqual(
+            preserved_state_path.read_text(encoding="utf-8"),
+            '{"preserve":true}\n',
+        )
+        self.assertEqual(
+            preserved_workspace_path.read_text(encoding="utf-8"),
+            "keep me\n",
+        )
+
+    def test_generate_all_bots_stack_merges_shared_channel_config(self) -> None:
+        first = create_bot(
+            self.work_dir,
+            BotAnswers(
+                display_name="Bundle Bot",
+                role="Generowanie artefaktow",
+                skill_sources=[],
+                system_packages=[],
+                python_packages=[],
+                node_packages=[],
+                secret_names=[],
+                websites=[],
+                databases=[],
+                access_notes=[],
+            ),
+        )
+        second = create_bot(
+            self.work_dir,
+            BotAnswers(
+                display_name="Docs Bot",
+                role="Dokumentacja",
+                skill_sources=[],
+                system_packages=[],
+                python_packages=[],
+                node_packages=[],
+                secret_names=[],
+                websites=[],
+                databases=[],
+                access_notes=[],
+            ),
+        )
+        for record in (first, second):
+            manifest = record.manifest
+            manifest.openclaw.channels = {
+                "telegram": {
+                    "enabled": True,
+                    "allowFrom": ["123456"],
+                }
+            }
+            record.manifest_path.write_text(render_manifest(manifest), encoding="utf-8")
+
+        with patch(
+            "openenv.bots.manager.build_lockfile",
+            side_effect=self._build_stub_lockfile,
+        ):
+            stack = generate_all_bots_stack(self.work_dir)
+
+        shared_config_text = (
+            self.work_dir / "bots" / ".all-bots" / ".openclaw" / "openclaw.json"
+        ).read_text(encoding="utf-8")
+        self.assertEqual(len(stack.bot_artifacts), 2)
+        self.assertIn('"channels"', shared_config_text)
+        self.assertIn('"telegram"', shared_config_text)
+        self.assertIn('"allowFrom"', shared_config_text)
+
+    def test_generate_all_bots_stack_copies_channel_env_placeholders_to_shared_env(self) -> None:
+        record = create_bot(
+            self.work_dir,
+            BotAnswers(
+                display_name="Telegram Bot",
+                role="Obsluga Telegrama",
+                skill_sources=[],
+                system_packages=[],
+                python_packages=[],
+                node_packages=[],
+                secret_names=["TELEGRAM_BOT_TOKEN"],
+                websites=[],
+                databases=[],
+                access_notes=[],
+            ),
+        )
+        manifest = record.manifest
+        manifest.runtime.secret_refs = []
+        manifest.openclaw.channels = {
+            "telegram": {
+                "enabled": True,
+                "botToken": "${TELEGRAM_BOT_TOKEN}",
+            }
+        }
+        record.manifest_path.write_text(render_manifest(manifest), encoding="utf-8")
+        sidecar_env_path = self.work_dir / "bots" / "telegram-bot" / ".env"
+        sidecar_env_path.write_text(
+            sidecar_env_path.read_text(encoding="utf-8").replace(
+                "TELEGRAM_BOT_TOKEN=",
+                "TELEGRAM_BOT_TOKEN=telegram-secret",
+            ),
+            encoding="utf-8",
+        )
+
+        with patch(
+            "openenv.bots.manager.build_lockfile",
+            side_effect=self._build_stub_lockfile,
+        ):
+            generate_all_bots_stack(self.work_dir)
+
+        shared_env_text = (
+            self.work_dir / "bots" / ".all-bots.env"
+        ).read_text(encoding="utf-8")
+        shared_config_text = (
+            self.work_dir / "bots" / ".all-bots" / ".openclaw" / "openclaw.json"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("TELEGRAM_BOT_TOKEN=telegram-secret", shared_env_text)
+        self.assertIn('"botToken": "${TELEGRAM_BOT_TOKEN}"', shared_config_text)
 
     def test_interactive_menu_adds_edits_and_deletes_bot(self) -> None:
         answers = iter(

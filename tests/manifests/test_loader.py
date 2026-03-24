@@ -9,6 +9,7 @@ from openenv.manifests import loader as manifest_loader
 from openenv.core.skills import MANDATORY_SKILL_SOURCES
 from openenv.core.errors import ValidationError
 from openenv.manifests.loader import load_manifest, parse_manifest
+from openenv.manifests.writer import render_manifest
 
 
 TESTS_ROOT = Path(__file__).resolve().parents[1]
@@ -234,6 +235,105 @@ read_only_root = false
             manifest.agent.memory_seed,
             ["Remember the operating model.", "Keep summaries short."],
         )
+
+    def test_parse_manifest_reads_openclaw_channel_config(self) -> None:
+        raw = """
+schema_version = 1
+
+[project]
+name = "channel-agent"
+version = "0.1.0"
+description = "channels"
+runtime = "openclaw"
+
+[runtime]
+base_image = "python:3.12-slim@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+python_version = "3.12"
+
+[agent]
+agents_md = "a"
+soul_md = "b"
+user_md = "c"
+
+[openclaw]
+agent_id = "main"
+agent_name = "Channel Agent"
+
+[openclaw.sandbox]
+mode = "workspace-write"
+scope = "session"
+workspace_access = "full"
+network = "bridge"
+read_only_root = false
+
+[openclaw.channels.telegram]
+enabled = true
+allowFrom = ["123456"]
+
+[openclaw.channels.googlechat.accounts.workspace]
+serviceAccountFile = "/opt/secrets/googlechat.json"
+"""
+        manifest = parse_manifest(tomllib.loads(raw))
+
+        self.assertEqual(
+            manifest.openclaw.channels,
+            {
+                "telegram": {"enabled": True, "allowFrom": ["123456"]},
+                "googlechat": {
+                    "accounts": {
+                        "workspace": {
+                            "serviceAccountFile": "/opt/secrets/googlechat.json",
+                        }
+                    }
+                },
+            },
+        )
+
+    def test_render_manifest_round_trips_openclaw_channel_config(self) -> None:
+        manifest = parse_manifest(
+            tomllib.loads(
+                """
+schema_version = 1
+
+[project]
+name = "channel-agent"
+version = "0.1.0"
+description = "channels"
+runtime = "openclaw"
+
+[runtime]
+base_image = "python:3.12-slim@sha256:1111111111111111111111111111111111111111111111111111111111111111"
+python_version = "3.12"
+
+[agent]
+agents_md = "a"
+soul_md = "b"
+user_md = "c"
+
+[openclaw]
+agent_id = "main"
+agent_name = "Channel Agent"
+
+[openclaw.sandbox]
+mode = "workspace-write"
+scope = "session"
+workspace_access = "full"
+network = "bridge"
+read_only_root = false
+
+[openclaw.channels.matrix]
+defaultAccount = "work"
+
+[openclaw.channels.matrix.accounts.work]
+homeserver = "https://matrix.example.org"
+allowBots = "mentions"
+"""
+            )
+        )
+
+        reparsed = parse_manifest(tomllib.loads(render_manifest(manifest)))
+
+        self.assertEqual(reparsed.openclaw.channels, manifest.openclaw.channels)
 
     def test_rejects_manifest_with_both_toml_and_sidecar_secret_refs(self) -> None:
         manifest_path = self.work_dir / "openclawenv.toml"

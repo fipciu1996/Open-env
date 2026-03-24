@@ -132,6 +132,7 @@ def parse_manifest(
             network=_require_string(sandbox_table, "network"),
             read_only_root=_require_bool(sandbox_table, "read_only_root"),
         ),
+        channels=_json_like_mapping(openclaw_table.get("channels", {}), "openclaw.channels"),
     )
     _validate_openclaw(openclaw)
 
@@ -372,6 +373,40 @@ def _validate_skill_names(skills: list[SkillConfig]) -> None:
         if skill.name in seen:
             raise ValidationError(f"Duplicate skill name: {skill.name}")
         seen.add(skill.name)
+
+
+def _json_like_mapping(value: Any, label: str) -> dict[str, Any]:
+    """Validate and normalize a TOML table into JSON-compatible nested data."""
+    if value in ({}, None):
+        return {}
+    if not isinstance(value, dict):
+        raise ValidationError(f"{label} must be a table when provided.")
+    normalized: dict[str, Any] = {}
+    for key, item in value.items():
+        if not isinstance(key, str) or not key.strip():
+            raise ValidationError(f"{label} keys must be non-empty strings.")
+        normalized[key] = _json_like_value(item, f"{label}.{key}")
+    return normalized
+
+
+def _json_like_value(value: Any, label: str) -> Any:
+    """Validate values that will be serialized into `openclaw.json`."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (str, int, float)):
+        return value
+    if isinstance(value, list):
+        return [_json_like_value(item, f"{label}[{index}]") for index, item in enumerate(value)]
+    if isinstance(value, dict):
+        normalized: dict[str, Any] = {}
+        for key, item in value.items():
+            if not isinstance(key, str) or not key.strip():
+                raise ValidationError(f"{label} keys must be non-empty strings.")
+            normalized[key] = _json_like_value(item, f"{label}.{key}")
+        return normalized
+    raise ValidationError(
+        f"{label} contains an unsupported value type for openclaw.json: {type(value).__name__}"
+    )
 
 
 def _require_table(

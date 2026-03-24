@@ -45,6 +45,7 @@ ALL_BOTS_GATEWAY_ROOT_DIR = "./.all-bots"
 ALL_BOTS_GATEWAY_CONFIG_DIR = "./.all-bots/.openclaw"
 ALL_BOTS_GATEWAY_WORKSPACE_DIR = "./.all-bots/workspace"
 ALL_BOTS_GATEWAY_CONTAINER_ROOT = "/opt/openclaw"
+ALL_BOTS_GATEWAY_HOME = ALL_BOTS_GATEWAY_CONTAINER_ROOT
 ALL_BOTS_GATEWAY_STATE_DIR = f"{ALL_BOTS_GATEWAY_CONTAINER_ROOT}/.openclaw"
 ALL_BOTS_GATEWAY_CONFIG_PATH = f"{ALL_BOTS_GATEWAY_STATE_DIR}/openclaw.json"
 DEFAULT_OPENCLAW_ENV_DEFAULTS: tuple[tuple[str, str], ...] = (
@@ -301,6 +302,7 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
         container_name = _all_bots_cli_container_name(spec.slug)
         env_file = f"./{spec.slug}/{default_env_filename(spec.manifest.openclaw.agent_name)}"
         cli_env = dict(_base_service_environment(spec.manifest))
+        cli_env["HOME"] = ALL_BOTS_GATEWAY_HOME
         cli_env["OPENCLAW_CONFIG_PATH"] = ALL_BOTS_GATEWAY_CONFIG_PATH
         cli_env["OPENCLAW_STATE_DIR"] = ALL_BOTS_GATEWAY_STATE_DIR
         cli_env["BROWSER"] = "echo"
@@ -443,6 +445,7 @@ def render_env_file(
 def render_all_bots_env_file(*, existing_values: dict[str, str] | None = None) -> str:
     """Render the shared env file consumed by the all-bots gateway and CLI helpers."""
     values = dict(existing_values or {})
+    used_keys: set[str] = set()
     lines = [
         "# Shared OpenClaw runtime secrets for the all-bots gateway",
         (
@@ -453,6 +456,13 @@ def render_all_bots_env_file(*, existing_values: dict[str, str] | None = None) -
     ]
     for key, default in DEFAULT_OPENCLAW_ENV_DEFAULTS:
         lines.append(f"{key}={values.get(key, default)}")
+        used_keys.add(key)
+    extra_keys = sorted(key for key in values if key not in used_keys)
+    if extra_keys:
+        lines.append("")
+        lines.append("# Preserved custom values")
+        for key in extra_keys:
+            lines.append(f"{key}={values[key]}")
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -488,7 +498,7 @@ def _base_service_environment(manifest: Manifest) -> dict[str, str]:
 def _shared_gateway_environment() -> dict[str, str]:
     """Return the baseline environment used by the shared gateway in the all-bots stack."""
     return {
-        "HOME": DEFAULT_OPENCLAW_HOME,
+        "HOME": ALL_BOTS_GATEWAY_HOME,
         "TERM": "xterm-256color",
         "OPENCLAW_CONFIG_PATH": ALL_BOTS_GATEWAY_CONFIG_PATH,
         "OPENCLAW_STATE_DIR": ALL_BOTS_GATEWAY_STATE_DIR,

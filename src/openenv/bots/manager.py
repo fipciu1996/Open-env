@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from copy import deepcopy
 import shutil
+import re
 from getpass import getpass
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
@@ -77,6 +79,9 @@ MANIFEST_FILENAME = "openclawenv.toml"
 LEGACY_MANIFEST_FILENAME = "openenv.toml"
 LOCKFILE_FILENAME = "openclawenv.lock"
 LEGACY_LOCKFILE_FILENAME = "openenv.lock"
+MAIN_OPENCLAW_AGENT_ID = "main"
+SHARED_AGENT_STATE_FILENAMES = ("auth-profiles.json", "auth.json", "models.json")
+ENV_PLACEHOLDER_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 AGENT_DOC_FILENAMES = {
     "agents_md": "AGENTS.md",
     "soul_md": "SOUL.md",
@@ -537,8 +542,10 @@ def update_bot(root: str | Path, existing_slug: str, answers: BotAnswers) -> Bot
     if new_slug != current_slug and target_dir.exists():
         raise OpenEnvError(f"Bot `{new_slug}` already exists.")
 
+    existing_manifest = load_bot(root, current_slug).manifest
     existing_secret_values = load_secret_values(secret_env_path(current_dir))
     manifest = build_bot_manifest(answers)
+    manifest.openclaw.channels = deepcopy(existing_manifest.openclaw.channels)
     if new_slug != current_slug:
         current_dir.rename(target_dir)
     else:
@@ -725,9 +732,14 @@ def generate_all_bots_stack(root: str | Path) -> AllBotsStackArtifacts:
         )
         for artifact in bot_artifacts
     ]
-    _materialize_all_bots_runtime(root, bot_artifacts)
+    required_shared_env_names = _materialize_all_bots_runtime(root, bot_artifacts)
     shared_env_path = bots_root(root) / all_bots_env_filename()
     shared_env_values = prepare_runtime_env_values(load_secret_values(shared_env_path))
+    _merge_required_shared_env_values(
+        shared_env_values,
+        bot_artifacts=bot_artifacts,
+        required_env_names=required_shared_env_names,
+    )
     write_env_file(shared_env_path, render_all_bots_env_file(existing_values=shared_env_values))
     stack_path = all_bots_compose_path(root)
     write_compose(stack_path, render_all_bots_compose(specs))
@@ -740,19 +752,19 @@ def generate_all_bots_stack(root: str | Path) -> AllBotsStackArtifacts:
 def _materialize_all_bots_runtime(
     root: str | Path,
     bot_artifacts: list[GeneratedArtifacts],
-) -> None:
+) -> set[str]:
     """Write the shared state/workspace tree consumed by the all-bots gateway."""
     shared_root = bots_root(root) / ".all-bots"
     shared_state_root = shared_root / ".openclaw"
     shared_workspace_root = shared_root / "workspace"
-    if shared_root.exists():
-        shutil.rmtree(shared_root, ignore_errors=True)
+    shared_root.mkdir(parents=True, exist_ok=True)
     shared_state_root.mkdir(parents=True, exist_ok=True)
     shared_workspace_root.mkdir(parents=True, exist_ok=True)
 
     shared_state_dir = ALL_BOTS_GATEWAY_STATE_DIR
     shared_workspace_prefix = PurePosixPath(ALL_BOTS_GATEWAY_CONTAINER_ROOT) / "workspace"
     shared_agent_entries: list[dict[str, object]] = []
+    shared_channels: dict[str, object] = {}
     seen_agent_ids: set[str] = set()
 
     for artifact in bot_artifacts:
@@ -771,6 +783,15 @@ def _materialize_all_bots_runtime(
             shared_workspace_root=shared_workspace_root / artifact.bot.slug,
             shared_state_dir=shared_state_dir,
             shared_workspace=shared_workspace,
+        )
+        _sync_shared_agent_state_from_main(
+            shared_state_root,
+            agent_id=manifest.openclaw.agent_id,
+        )
+        _merge_shared_channel_configs(
+            shared_channels,
+            manifest.openclaw.channels,
+            agent_id=manifest.openclaw.agent_id,
         )
         shared_agent_entries.append(
             manifest.openclaw.agent_definition(
@@ -796,10 +817,62 @@ def _materialize_all_bots_runtime(
             "list": shared_agent_entries,
         },
     }
+    if shared_channels:
+        shared_config["channels"] = shared_channels
     (shared_state_root / "openclaw.json").write_text(
         stable_json_dumps(shared_config, indent=2) + "\n",
         encoding="utf-8",
     )
+    return _collect_env_placeholders(shared_config)
+
+
+def _merge_required_shared_env_values(
+    shared_env_values: dict[str, str],
+    *,
+    bot_artifacts: list[GeneratedArtifacts],
+    required_env_names: set[str],
+) -> None:
+    """Populate the shared env file with values referenced by the shared config."""
+    missing_names = {
+        name for name in required_env_names if not shared_env_values.get(name, "").strip()
+    }
+    if not missing_names:
+        return
+
+    for artifact in bot_artifacts:
+        candidate_sources = [
+            load_secret_values(secret_env_path(artifact.bot.manifest_path.parent)),
+        ]
+        if artifact.env_path.exists():
+            candidate_sources.append(load_secret_values(artifact.env_path))
+        for source in candidate_sources:
+            for name in sorted(missing_names):
+                value = source.get(name, "")
+                if not value.strip():
+                    continue
+                shared_env_values[name] = value
+            missing_names = {
+                name for name in missing_names if not shared_env_values.get(name, "").strip()
+            }
+            if not missing_names:
+                return
+
+
+def _collect_env_placeholders(value: object) -> set[str]:
+    """Collect `${VAR}` placeholders recursively from JSON-like config values."""
+    if isinstance(value, str):
+        return set(ENV_PLACEHOLDER_PATTERN.findall(value))
+    if isinstance(value, dict):
+        placeholders: set[str] = set()
+        for nested in value.values():
+            placeholders.update(_collect_env_placeholders(nested))
+        return placeholders
+    if isinstance(value, list):
+        placeholders: set[str] = set()
+        for nested in value:
+            placeholders.update(_collect_env_placeholders(nested))
+        return placeholders
+    return set()
 
 
 def _write_shared_bot_workspace(
@@ -832,6 +905,41 @@ def _write_shared_bot_workspace(
         )
         host_path.parent.mkdir(parents=True, exist_ok=True)
         host_path.write_text(content, encoding="utf-8")
+
+
+def _sync_shared_agent_state_from_main(shared_state_root: Path, *, agent_id: str) -> None:
+    """Seed per-agent auth/model files from the main agent without overwriting custom state."""
+    if agent_id == MAIN_OPENCLAW_AGENT_ID:
+        return
+    main_agent_root = shared_state_root / "agents" / MAIN_OPENCLAW_AGENT_ID / "agent"
+    if not main_agent_root.exists():
+        return
+    target_agent_root = shared_state_root / "agents" / agent_id / "agent"
+    target_agent_root.mkdir(parents=True, exist_ok=True)
+    for filename in SHARED_AGENT_STATE_FILENAMES:
+        source_path = main_agent_root / filename
+        target_path = target_agent_root / filename
+        if source_path.exists() and not target_path.exists():
+            shutil.copy2(source_path, target_path)
+
+
+def _merge_shared_channel_configs(
+    shared_channels: dict[str, object],
+    incoming_channels: dict[str, object],
+    *,
+    agent_id: str,
+) -> None:
+    """Merge channel config into the shared gateway, rejecting incompatible duplicates."""
+    for channel_id, channel_config in incoming_channels.items():
+        if channel_id not in shared_channels:
+            shared_channels[channel_id] = deepcopy(channel_config)
+            continue
+        if shared_channels[channel_id] != channel_config:
+            raise OpenEnvError(
+                "Shared gateway generation requires consistent openclaw.channels configs; "
+                f"conflict detected for channel `{channel_id}` while processing agent "
+                f"`{agent_id}`."
+            )
 
 
 def _map_shared_host_path(
@@ -962,7 +1070,7 @@ def build_bot_manifest(answers: BotAnswers) -> Manifest:
             state_dir="/opt/openclaw",
             tools_allow=["shell_command"],
             tools_deny=[],
-            sandbox=SandboxConfig(),
+            sandbox=SandboxConfig(mode="off"),
         ),
         access=AccessConfig(
             websites=answers.websites,

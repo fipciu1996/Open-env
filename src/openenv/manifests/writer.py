@@ -118,6 +118,9 @@ def render_manifest(manifest: Manifest) -> str:
     lines.extend(_render_kv("allow", manifest.openclaw.tools_allow))
     lines.extend(_render_kv("deny", manifest.openclaw.tools_deny))
     lines.append("")
+    if manifest.openclaw.channels:
+        lines.extend(_render_table("openclaw.channels", manifest.openclaw.channels))
+        lines.append("")
     return "\n".join(lines)
 
 
@@ -137,6 +140,10 @@ def _render_kv(key: str, value: object) -> list[str]:
         return [f"{key} = {json.dumps(value)}"]
     if isinstance(value, bool):
         return [f"{key} = {'true' if value else 'false'}"]
+    if isinstance(value, int) and not isinstance(value, bool):
+        return [f"{key} = {value}"]
+    if isinstance(value, float):
+        return [f"{key} = {json.dumps(value)}"]
     if isinstance(value, list):
         if not value:
             return [f"{key} = []"]
@@ -151,3 +158,62 @@ def _render_inline_table(values: dict[str, str]) -> str:
         f"{json.dumps(key)} = {json.dumps(value)}" for key, value in sorted(values.items())
     )
     return "{ " + rendered + " }"
+
+
+def _render_table(path: str, values: dict[str, object]) -> list[str]:
+    """Render a nested TOML table with support for arrays of tables."""
+    lines = [f"[{path}]"]
+    nested_tables: list[tuple[str, dict[str, object]]] = []
+    table_arrays: list[tuple[str, list[dict[str, object]]]] = []
+
+    for key, value in values.items():
+        if isinstance(value, dict):
+            nested_tables.append((key, value))
+            continue
+        if _is_table_array(value):
+            table_arrays.append((key, value))
+            continue
+        lines.extend(_render_kv(key, value))
+
+    for key, value in nested_tables:
+        lines.append("")
+        lines.extend(_render_table(f"{path}.{key}", value))
+
+    for key, entries in table_arrays:
+        for entry in entries:
+            lines.append("")
+            lines.extend(_render_table_array(f"{path}.{key}", entry))
+
+    return lines
+
+
+def _render_table_array(path: str, values: dict[str, object]) -> list[str]:
+    """Render one TOML array-of-tables entry recursively."""
+    lines = [f"[[{path}]]"]
+    nested_tables: list[tuple[str, dict[str, object]]] = []
+    table_arrays: list[tuple[str, list[dict[str, object]]]] = []
+
+    for key, value in values.items():
+        if isinstance(value, dict):
+            nested_tables.append((key, value))
+            continue
+        if _is_table_array(value):
+            table_arrays.append((key, value))
+            continue
+        lines.extend(_render_kv(key, value))
+
+    for key, value in nested_tables:
+        lines.append("")
+        lines.extend(_render_table(f"{path}.{key}", value))
+
+    for key, entries in table_arrays:
+        for entry in entries:
+            lines.append("")
+            lines.extend(_render_table_array(f"{path}.{key}", entry))
+
+    return lines
+
+
+def _is_table_array(value: object) -> bool:
+    """Return whether a TOML list should be rendered as an array of tables."""
+    return isinstance(value, list) and bool(value) and all(isinstance(item, dict) for item in value)

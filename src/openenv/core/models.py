@@ -9,6 +9,15 @@ from typing import Any
 from openenv.core.utils import rewrite_openclaw_home_paths, sha256_text
 
 
+def _clone_json_value(value: Any) -> Any:
+    """Return a deep copy of JSON-like data with dictionaries sorted for stability."""
+    if isinstance(value, dict):
+        return {key: _clone_json_value(value[key]) for key in sorted(value)}
+    if isinstance(value, list):
+        return [_clone_json_value(item) for item in value]
+    return value
+
+
 @dataclass(slots=True)
 class ProjectConfig:
     """Project-level metadata stored in the manifest."""
@@ -240,6 +249,7 @@ class OpenClawConfig:
     tools_allow: list[str] = field(default_factory=list)
     tools_deny: list[str] = field(default_factory=list)
     sandbox: SandboxConfig = field(default_factory=SandboxConfig)
+    channels: dict[str, Any] = field(default_factory=dict)
 
     def config_path(self, *, state_dir: str | None = None) -> str:
         """Return the on-disk path of the generated `openclaw.json` file."""
@@ -253,7 +263,7 @@ class OpenClawConfig:
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize OpenClaw configuration using manifest field names."""
-        return {
+        data = {
             "agent_id": self.agent_id,
             "agent_name": self.agent_name,
             "sandbox": self.sandbox.to_dict(),
@@ -262,21 +272,14 @@ class OpenClawConfig:
             "tools_deny": list(self.tools_deny),
             "workspace": self.workspace,
         }
+        if self.channels:
+            data["channels"] = _clone_json_value(self.channels)
+        return data
 
     def to_openclaw_json(self, image_reference: str) -> dict[str, Any]:
         """Render the `openclaw.json` payload expected by the OpenClaw gateway."""
         workspace = self.workspace
-        sandbox = {
-            "mode": self._sandbox_mode(),
-            "backend": "docker",
-            "scope": self.sandbox.scope,
-            "workspaceAccess": self._workspace_access(),
-            "docker": {
-                "image": image_reference,
-                "network": self.sandbox.network,
-                "readOnlyRoot": self.sandbox.read_only_root,
-            },
-        }
+        sandbox = self._openclaw_sandbox(image_reference)
         data: dict[str, Any] = {
             "gateway": {
                 "mode": "local",
@@ -306,6 +309,8 @@ class OpenClawConfig:
                 "allow": self.tools_allow,
                 "deny": self.tools_deny,
             }
+        if self.channels:
+            data["channels"] = _clone_json_value(self.channels)
         return data
 
     def agent_definition(
@@ -325,23 +330,30 @@ class OpenClawConfig:
             "agentDir": self.agent_dir(state_dir=state_dir),
         }
         if include_runtime_overrides:
-            entry["sandbox"] = {
-                "mode": self._sandbox_mode(),
-                "backend": "docker",
-                "scope": self.sandbox.scope,
-                "workspaceAccess": self._workspace_access(),
-                "docker": {
-                    "image": image_reference,
-                    "network": self.sandbox.network,
-                    "readOnlyRoot": self.sandbox.read_only_root,
-                },
-            }
+            entry["sandbox"] = self._openclaw_sandbox(image_reference)
             if self.tools_allow or self.tools_deny:
                 entry["tools"] = {
                     "allow": list(self.tools_allow),
                     "deny": list(self.tools_deny),
                 }
         return entry
+
+    def _openclaw_sandbox(self, image_reference: str) -> dict[str, Any]:
+        """Return the effective OpenClaw sandbox payload for this agent."""
+        mode = self._sandbox_mode()
+        if mode == "off":
+            return {"mode": "off"}
+        return {
+            "mode": mode,
+            "backend": "docker",
+            "scope": self.sandbox.scope,
+            "workspaceAccess": self._workspace_access(),
+            "docker": {
+                "image": image_reference,
+                "network": self.sandbox.network,
+                "readOnlyRoot": self.sandbox.read_only_root,
+            },
+        }
 
     def _sandbox_mode(self) -> str:
         """Map wrapper-oriented sandbox modes to OpenClaw's sandbox activation values."""

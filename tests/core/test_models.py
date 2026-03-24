@@ -8,6 +8,7 @@ from openenv.core.models import (
     OpenClawConfig,
     ProjectConfig,
     RuntimeConfig,
+    SandboxConfig,
     SkillConfig,
 )
 from openenv.core.utils import sha256_text
@@ -123,3 +124,80 @@ class ManifestModelTests(unittest.TestCase):
             config["agents"]["defaults"]["sandbox"]["docker"]["image"],
             "${OPENCLAW_IMAGE}",
         )
+
+    def test_openclaw_json_includes_raw_channel_config(self) -> None:
+        manifest = Manifest(
+            schema_version=1,
+            project=ProjectConfig(
+                name="Channel Bot",
+                version="1.0.0",
+                description="Tests generated channel config.",
+                runtime="openclaw",
+            ),
+            runtime=RuntimeConfig(
+                base_image="python:3.12-slim@sha256:" + "1" * 64,
+                python_version="3.12",
+            ),
+            agent=AgentConfig(
+                agents_md="Agents",
+                soul_md="Soul",
+                user_md="User",
+            ),
+            skills=[],
+            openclaw=OpenClawConfig(
+                agent_id="channel-bot",
+                agent_name="Channel Bot",
+                channels={
+                    "telegram": {
+                        "enabled": True,
+                        "allowFrom": ["123456"],
+                    },
+                    "googlechat": {
+                        "accounts": {
+                            "workspace": {
+                                "serviceAccountFile": "/opt/secrets/googlechat.json",
+                            }
+                        }
+                    },
+                },
+            ),
+        )
+
+        config = manifest.openclaw.to_openclaw_json("${OPENCLAW_IMAGE}")
+
+        self.assertEqual(config["channels"]["telegram"]["allowFrom"], ["123456"])
+        self.assertTrue(config["channels"]["telegram"]["enabled"])
+        self.assertEqual(
+            config["channels"]["googlechat"]["accounts"]["workspace"]["serviceAccountFile"],
+            "/opt/secrets/googlechat.json",
+        )
+
+    def test_openclaw_json_omits_docker_backend_when_sandbox_is_off(self) -> None:
+        manifest = Manifest(
+            schema_version=1,
+            project=ProjectConfig(
+                name="Outer Sandbox Bot",
+                version="1.0.0",
+                description="Runs inside an outer container sandbox.",
+                runtime="openclaw",
+            ),
+            runtime=RuntimeConfig(
+                base_image="python:3.12-slim@sha256:" + "1" * 64,
+                python_version="3.12",
+            ),
+            agent=AgentConfig(
+                agents_md="Agents",
+                soul_md="Soul",
+                user_md="User",
+            ),
+            skills=[],
+            openclaw=OpenClawConfig(
+                agent_id="outer-sandbox-bot",
+                agent_name="Outer Sandbox Bot",
+                sandbox=SandboxConfig(mode="off"),
+            ),
+        )
+
+        config = manifest.openclaw.to_openclaw_json("${OPENCLAW_IMAGE}")
+
+        self.assertEqual(config["agents"]["defaults"]["sandbox"], {"mode": "off"})

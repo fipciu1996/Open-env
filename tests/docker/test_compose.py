@@ -21,6 +21,7 @@ from openenv.docker.compose import (
     default_env_filename,
     gateway_container_name,
     render_all_bots_compose,
+    render_all_bots_env_file,
     render_compose,
     render_env_file,
 )
@@ -112,6 +113,18 @@ class ComposeTests(unittest.TestCase):
         self.assertEqual(all_bots_compose_filename(), "all-bots-compose.yml")
         self.assertEqual(all_bots_env_filename(), ".all-bots.env")
 
+    def test_render_all_bots_env_file_preserves_custom_values(self) -> None:
+        env_text = render_all_bots_env_file(
+            existing_values={
+                "OPENCLAW_GATEWAY_TOKEN": "gateway-token",
+                "TELEGRAM_BOT_TOKEN": "telegram-secret",
+            }
+        )
+
+        self.assertIn("OPENCLAW_GATEWAY_TOKEN=gateway-token", env_text)
+        self.assertIn("# Preserved custom values", env_text)
+        self.assertIn("TELEGRAM_BOT_TOKEN=telegram-secret", env_text)
+
     def test_container_names_use_openclaw_suffixes(self) -> None:
         self.assertEqual(
             gateway_container_name("Operations Agent"),
@@ -190,6 +203,7 @@ class ComposeTests(unittest.TestCase):
         self.assertIn('      - "./analytics-agent/.analytics-agent.env"', compose_text)
         self.assertEqual(compose_text.count('      - "./.all-bots.env"'), 3)
         self.assertIn('    image: "${OPENCLAW_GATEWAY_IMAGE:-ghcr.io/openclaw/openclaw:latest}"', compose_text)
+        self.assertIn('      HOME: "/opt/openclaw"', compose_text)
         self.assertIn('      OPENCLAW_STATE_DIR: "/opt/openclaw/.openclaw"', compose_text)
         self.assertIn('      OPENCLAW_CONFIG_PATH: "/opt/openclaw/.openclaw/openclaw.json"', compose_text)
         self.assertIn('      - "./.all-bots:/opt/openclaw"', compose_text)
