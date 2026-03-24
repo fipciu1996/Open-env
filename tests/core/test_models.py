@@ -83,3 +83,43 @@ class ManifestModelTests(unittest.TestCase):
             snapshot["skills"][0]["assets"]["notes.md"],
             sha256_text(asset_md),
         )
+
+    def test_openclaw_json_includes_gateway_and_normalized_sandbox_fields(self) -> None:
+        manifest = Manifest(
+            schema_version=1,
+            project=ProjectConfig(
+                name="Gateway Bot",
+                version="1.0.0",
+                description="Tests generated OpenClaw config.",
+                runtime="openclaw",
+            ),
+            runtime=RuntimeConfig(
+                base_image="python:3.12-slim@sha256:" + "1" * 64,
+                python_version="3.12",
+            ),
+            agent=AgentConfig(
+                agents_md="Agents",
+                soul_md="Soul",
+                user_md="User",
+            ),
+            skills=[],
+            openclaw=OpenClawConfig(
+                agent_id="gateway-bot",
+                agent_name="Gateway Bot",
+                tools_allow=["shell_command"],
+            ),
+        )
+
+        config = manifest.openclaw.to_openclaw_json("${OPENCLAW_IMAGE}")
+
+        self.assertEqual(config["gateway"]["mode"], "local")
+        self.assertEqual(config["gateway"]["bind"], "lan")
+        self.assertEqual(config["gateway"]["auth"]["mode"], "token")
+        self.assertEqual(config["gateway"]["auth"]["token"], "${OPENCLAW_GATEWAY_TOKEN}")
+        self.assertEqual(config["agents"]["defaults"]["sandbox"]["mode"], "all")
+        self.assertEqual(config["agents"]["defaults"]["sandbox"]["backend"], "docker")
+        self.assertEqual(config["agents"]["defaults"]["sandbox"]["workspaceAccess"], "rw")
+        self.assertEqual(
+            config["agents"]["defaults"]["sandbox"]["docker"]["image"],
+            "${OPENCLAW_IMAGE}",
+        )

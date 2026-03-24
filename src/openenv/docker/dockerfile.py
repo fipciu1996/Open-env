@@ -38,7 +38,7 @@ def render_dockerfile(
         manifest,
         raw_manifest_text=raw_manifest_text,
         raw_lock_text=raw_lock_text,
-        base_reference=sandbox_reference,
+        image_reference="${OPENCLAW_IMAGE}",
     )
     payload_b64 = encode_payload(payload)
     lines: list[str] = [
@@ -99,12 +99,11 @@ def render_runtime_payload(
     raw_lock_text: str,
 ) -> dict[str, object]:
     """Return the file payload embedded into the runtime image."""
-    sandbox_reference = lockfile.base_image["resolved_reference"]
     return _render_payload(
         manifest,
         raw_manifest_text=raw_manifest_text,
         raw_lock_text=raw_lock_text,
-        base_reference=sandbox_reference,
+        image_reference="${OPENCLAW_IMAGE}",
     )
 
 
@@ -113,12 +112,12 @@ def _render_payload(
     *,
     raw_manifest_text: str,
     raw_lock_text: str,
-    base_reference: str,
+    image_reference: str,
 ) -> dict[str, object]:
     """Assemble the file payload embedded into the generated Dockerfile."""
     files = manifest.workspace_files()
     files[manifest.openclaw.config_path()] = (
-        stable_json_dumps(manifest.openclaw.to_openclaw_json(base_reference), indent=2)
+        stable_json_dumps(manifest.openclaw.to_openclaw_json(image_reference), indent=2)
         + "\n"
     )
     files[str(PurePosixPath("/opt/openclawenv") / "openclawenv.toml")] = raw_manifest_text

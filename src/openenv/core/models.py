@@ -241,13 +241,15 @@ class OpenClawConfig:
     tools_deny: list[str] = field(default_factory=list)
     sandbox: SandboxConfig = field(default_factory=SandboxConfig)
 
-    def config_path(self) -> str:
+    def config_path(self, *, state_dir: str | None = None) -> str:
         """Return the on-disk path of the generated `openclaw.json` file."""
-        return str(PurePosixPath(self.state_dir) / "openclaw.json")
+        return str(PurePosixPath(state_dir or self.state_dir) / "openclaw.json")
 
-    def agent_dir(self) -> str:
+    def agent_dir(self, *, state_dir: str | None = None) -> str:
         """Return the OpenClaw agent directory used by the gateway runtime."""
-        return str(PurePosixPath(self.state_dir) / "agents" / self.agent_id / "agent")
+        return str(
+            PurePosixPath(state_dir or self.state_dir) / "agents" / self.agent_id / "agent"
+        )
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize OpenClaw configuration using manifest field names."""
@@ -263,10 +265,12 @@ class OpenClawConfig:
 
     def to_openclaw_json(self, image_reference: str) -> dict[str, Any]:
         """Render the `openclaw.json` payload expected by the OpenClaw gateway."""
+        workspace = self.workspace
         sandbox = {
-            "mode": self.sandbox.mode,
+            "mode": self._sandbox_mode(),
+            "backend": "docker",
             "scope": self.sandbox.scope,
-            "workspaceAccess": self.sandbox.workspace_access,
+            "workspaceAccess": self._workspace_access(),
             "docker": {
                 "image": image_reference,
                 "network": self.sandbox.network,
@@ -274,16 +278,24 @@ class OpenClawConfig:
             },
         }
         data: dict[str, Any] = {
+            "gateway": {
+                "mode": "local",
+                "bind": "lan",
+                "auth": {
+                    "mode": "token",
+                    "token": "${OPENCLAW_GATEWAY_TOKEN}",
+                },
+            },
             "agents": {
                 "defaults": {
-                    "workspace": self.workspace,
+                    "workspace": workspace,
                     "sandbox": sandbox,
                 },
                 "list": [
                     {
                         "id": self.agent_id,
                         "name": self.agent_name,
-                        "workspace": self.workspace,
+                        "workspace": workspace,
                         "agentDir": self.agent_dir(),
                     }
                 ],
@@ -295,6 +307,63 @@ class OpenClawConfig:
                 "deny": self.tools_deny,
             }
         return data
+
+    def agent_definition(
+        self,
+        image_reference: str,
+        *,
+        workspace: str | None = None,
+        state_dir: str | None = None,
+        include_runtime_overrides: bool = True,
+    ) -> dict[str, Any]:
+        """Return one `agents.list[]` entry for shared multi-agent configurations."""
+        resolved_workspace = workspace or self.workspace
+        entry: dict[str, Any] = {
+            "id": self.agent_id,
+            "name": self.agent_name,
+            "workspace": resolved_workspace,
+            "agentDir": self.agent_dir(state_dir=state_dir),
+        }
+        if include_runtime_overrides:
+            entry["sandbox"] = {
+                "mode": self._sandbox_mode(),
+                "backend": "docker",
+                "scope": self.sandbox.scope,
+                "workspaceAccess": self._workspace_access(),
+                "docker": {
+                    "image": image_reference,
+                    "network": self.sandbox.network,
+                    "readOnlyRoot": self.sandbox.read_only_root,
+                },
+            }
+            if self.tools_allow or self.tools_deny:
+                entry["tools"] = {
+                    "allow": list(self.tools_allow),
+                    "deny": list(self.tools_deny),
+                }
+        return entry
+
+    def _sandbox_mode(self) -> str:
+        """Map wrapper-oriented sandbox modes to OpenClaw's sandbox activation values."""
+        normalized = self.sandbox.mode.strip().lower()
+        if normalized in {"off", "non-main", "all"}:
+            return normalized
+        return "all"
+
+    def _workspace_access(self) -> str:
+        """Map wrapper workspace access labels to OpenClaw sandbox access values."""
+        normalized = self.sandbox.workspace_access.strip().lower()
+        access_map = {
+            "full": "rw",
+            "rw": "rw",
+            "write": "rw",
+            "workspace-write": "rw",
+            "read-only": "ro",
+            "readonly": "ro",
+            "ro": "ro",
+            "none": "none",
+        }
+        return access_map.get(normalized, "rw")
 
 
 @dataclass(slots=True)
@@ -323,40 +392,43 @@ class Manifest:
             data["access"] = self.access.to_dict()
         return data
 
-    def workspace_files(self) -> dict[str, str]:
+    def workspace_files(
+        self,
+        *,
+        workspace: str | None = None,
+        state_dir: str | None = None,
+    ) -> dict[str, str]:
         """Return every file that must be written into the bot workspace at build time.
 
         The returned mapping already includes path rewriting for skills so hard-coded home
         references are converted to the runtime-specific OpenClaw directories.
         """
+        workspace_root = workspace or self.openclaw.workspace
+        state_root = state_dir or self.openclaw.state_dir
         files: dict[str, str] = {
-            str(PurePosixPath(self.openclaw.workspace) / "AGENTS.md"): self.agent.agents_md,
-            str(PurePosixPath(self.openclaw.workspace) / "SOUL.md"): self.agent.soul_md,
-            str(PurePosixPath(self.openclaw.workspace) / "USER.md"): self.agent.user_md,
+            str(PurePosixPath(workspace_root) / "AGENTS.md"): self.agent.agents_md,
+            str(PurePosixPath(workspace_root) / "SOUL.md"): self.agent.soul_md,
+            str(PurePosixPath(workspace_root) / "USER.md"): self.agent.user_md,
         }
         if self.agent.identity_md is not None:
-            files[str(PurePosixPath(self.openclaw.workspace) / "IDENTITY.md")] = (
-                self.agent.identity_md
-            )
+            files[str(PurePosixPath(workspace_root) / "IDENTITY.md")] = self.agent.identity_md
         if self.agent.tools_md is not None:
-            files[str(PurePosixPath(self.openclaw.workspace) / "TOOLS.md")] = (
-                self.agent.tools_md
-            )
+            files[str(PurePosixPath(workspace_root) / "TOOLS.md")] = self.agent.tools_md
         if self.agent.memory_seed:
-            files[str(PurePosixPath(self.openclaw.workspace) / "memory.md")] = "\n".join(
-                self.agent.memory_seed
-            ).strip() + "\n"
+            files[str(PurePosixPath(workspace_root) / "memory.md")] = (
+                "\n".join(self.agent.memory_seed).strip() + "\n"
+            )
         for skill in self.skills:
-            skill_root = PurePosixPath(self.openclaw.workspace) / "skills" / skill.name
+            skill_root = PurePosixPath(workspace_root) / "skills" / skill.name
             files[str(skill_root / "SKILL.md")] = skill.rendered_content(
-                state_dir=self.openclaw.state_dir,
-                workspace=self.openclaw.workspace,
+                state_dir=state_root,
+                workspace=workspace_root,
             )
             for relative_path, content in sorted(skill.assets.items()):
                 files[str(skill_root / relative_path)] = rewrite_openclaw_home_paths(
                     content,
-                    state_dir=self.openclaw.state_dir,
-                    workspace=self.openclaw.workspace,
+                    state_dir=state_root,
+                    workspace=workspace_root,
                 )
         return dict(sorted(files.items()))
 

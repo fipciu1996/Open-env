@@ -301,16 +301,32 @@ class BotManagerTests(unittest.TestCase):
         self.assertEqual(len(stack.bot_artifacts), 2)
         self.assertTrue(stack.stack_path.exists())
         stack_text = stack.stack_path.read_text(encoding="utf-8")
+        shared_env_path = self.work_dir / "bots" / ".all-bots.env"
+        shared_config_path = self.work_dir / "bots" / ".all-bots" / ".openclaw" / "openclaw.json"
         self.assertIn("openclaw-gateway:", stack_text)
         self.assertEqual(stack_text.count("openclaw-gateway:"), 1)
         self.assertIn("bot-bundle-bot:", stack_text)
         self.assertIn("bot-docs-bot:", stack_text)
         self.assertIn('context: "./bundle-bot"', stack_text)
         self.assertIn('context: "./docs-bot"', stack_text)
+        self.assertIn('      - "./.all-bots.env"', stack_text)
         self.assertIn('OPENCLAW_CONFIG_PATH: "/opt/openclaw/openclaw.json"', stack_text)
         self.assertIn('OPENCLAW_STATE_DIR: "/opt/openclaw"', stack_text)
         self.assertIn('"./.all-bots/.openclaw:/opt/openclaw"', stack_text)
         self.assertIn('"./.all-bots/workspace:/opt/openclaw/workspace"', stack_text)
+        self.assertTrue(shared_env_path.exists())
+        self.assertIn("OPENCLAW_GATEWAY_TOKEN=", shared_env_path.read_text(encoding="utf-8"))
+        self.assertTrue(shared_config_path.exists())
+        shared_config_text = shared_config_path.read_text(encoding="utf-8")
+        self.assertIn('"token": "${OPENCLAW_GATEWAY_TOKEN}"', shared_config_text)
+        self.assertIn('"/opt/openclaw/workspace/bundle-bot"', shared_config_text)
+        self.assertIn('"/opt/openclaw/workspace/docs-bot"', shared_config_text)
+        self.assertTrue(
+            (self.work_dir / "bots" / ".all-bots" / "workspace" / "bundle-bot" / "AGENTS.md").exists()
+        )
+        self.assertTrue(
+            (self.work_dir / "bots" / ".all-bots" / "workspace" / "docs-bot" / "AGENTS.md").exists()
+        )
 
     def test_interactive_menu_adds_edits_and_deletes_bot(self) -> None:
         answers = iter(

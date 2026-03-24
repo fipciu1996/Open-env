@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 import json
 from pathlib import Path
+import secrets
 
 from pathlib import PurePosixPath
 
@@ -39,6 +40,7 @@ LEGACY_OPENCLAW_IMAGE = "alpine/openclaw:main"
 ALL_BOTS_GATEWAY_SERVICE = "openclaw-gateway"
 ALL_BOTS_GATEWAY_CONTAINER = "all-bots-openclaw-gateway"
 ALL_BOTS_COMPOSE_FILENAME = "all-bots-compose.yml"
+ALL_BOTS_ENV_FILENAME = ".all-bots.env"
 ALL_BOTS_GATEWAY_CONFIG_DIR = "./.all-bots/.openclaw"
 ALL_BOTS_GATEWAY_WORKSPACE_DIR = "./.all-bots/workspace"
 ALL_BOTS_GATEWAY_STATE_DIR = "/opt/openclaw"
@@ -74,6 +76,11 @@ def default_env_filename(agent_name: str) -> str:
 def all_bots_compose_filename() -> str:
     """Return the shared compose filename for all managed bots."""
     return ALL_BOTS_COMPOSE_FILENAME
+
+
+def all_bots_env_filename() -> str:
+    """Return the shared env filename used by the all-bots stack."""
+    return ALL_BOTS_ENV_FILENAME
 
 
 def gateway_container_name(agent_name: str) -> str:
@@ -223,11 +230,14 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
     """Render a shared stack with one gateway and CLI services for all bots."""
     if not specs:
         raise ValueError("At least one bot is required to render the shared compose stack.")
+    shared_env_file = f"./{all_bots_env_filename()}"
     lines = [
         "services:",
         f"  {ALL_BOTS_GATEWAY_SERVICE}:",
         f'    image: {_quoted(f"${{OPENCLAW_GATEWAY_IMAGE:-{DEFAULT_OPENCLAW_GATEWAY_IMAGE}}}")}',
         f"    container_name: {_quoted(ALL_BOTS_GATEWAY_CONTAINER)}",
+        "    env_file:",
+        f"      - {_quoted(shared_env_file)}",
         "    environment:",
     ]
     lines.extend(_render_environment(_shared_gateway_environment()))
@@ -294,11 +304,13 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
         service_name = _all_bots_cli_service_name(spec.slug)
         container_name = _all_bots_cli_container_name(spec.slug)
         env_file = f"./{spec.slug}/{default_env_filename(spec.manifest.openclaw.agent_name)}"
-        config_mount = f"./{spec.slug}/.openclaw:{spec.manifest.openclaw.state_dir}"
+        config_mount = f"{ALL_BOTS_GATEWAY_CONFIG_DIR}:{ALL_BOTS_GATEWAY_STATE_DIR}"
         workspace_mount = (
-            f"./{spec.slug}/workspace:{spec.manifest.openclaw.workspace}"
+            f"{ALL_BOTS_GATEWAY_WORKSPACE_DIR}:{ALL_BOTS_GATEWAY_STATE_DIR}/workspace"
         )
         cli_env = dict(_base_service_environment(spec.manifest))
+        cli_env["OPENCLAW_CONFIG_PATH"] = ALL_BOTS_GATEWAY_CONFIG_PATH
+        cli_env["OPENCLAW_STATE_DIR"] = ALL_BOTS_GATEWAY_STATE_DIR
         cli_env["BROWSER"] = "echo"
         lines.extend(
             [
@@ -328,6 +340,7 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
                 f'      nproc: "${{OPENCLAW_NPROC:-{DEFAULT_OPENCLAW_NPROC}}}"',
                 "    env_file:",
                 f"      - {_quoted(env_file)}",
+                f"      - {_quoted(shared_env_file)}",
                 "    environment:",
             ]
         )
@@ -436,9 +449,38 @@ def render_env_file(
     return "\n".join(lines).rstrip() + "\n"
 
 
+def render_all_bots_env_file(*, existing_values: dict[str, str] | None = None) -> str:
+    """Render the shared env file consumed by the all-bots gateway and CLI helpers."""
+    values = dict(existing_values or {})
+    lines = [
+        "# Shared OpenClaw runtime secrets for the all-bots gateway",
+        (
+            "# Use with: docker compose -f "
+            f"{all_bots_compose_filename()} up -d"
+        ),
+        "",
+    ]
+    for key, default in DEFAULT_OPENCLAW_ENV_DEFAULTS:
+        lines.append(f"{key}={values.get(key, default)}")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def write_env_file(path: str | Path, env_text: str) -> None:
     """Write the env file to disk."""
     Path(path).write_text(env_text, encoding="utf-8")
+
+
+def prepare_runtime_env_values(existing_values: dict[str, str] | None = None) -> dict[str, str]:
+    """Fill runtime env values that should exist before writing generated env files."""
+    values = dict(existing_values or {})
+    if not values.get("OPENCLAW_GATEWAY_TOKEN", "").strip():
+        values["OPENCLAW_GATEWAY_TOKEN"] = generate_gateway_token()
+    return values
+
+
+def generate_gateway_token() -> str:
+    """Return a random gateway token for generated local stacks."""
+    return secrets.token_urlsafe(24)
 
 
 def _base_service_environment(manifest: Manifest) -> dict[str, str]:
@@ -454,16 +496,13 @@ def _base_service_environment(manifest: Manifest) -> dict[str, str]:
 
 def _shared_gateway_environment() -> dict[str, str]:
     """Return the baseline environment used by the shared gateway in the all-bots stack."""
-    environment = {
+    return {
         "HOME": DEFAULT_OPENCLAW_HOME,
         "TERM": "xterm-256color",
         "OPENCLAW_CONFIG_PATH": ALL_BOTS_GATEWAY_CONFIG_PATH,
         "OPENCLAW_STATE_DIR": ALL_BOTS_GATEWAY_STATE_DIR,
         "TZ": f"${{OPENCLAW_TZ:-{DEFAULT_OPENCLAW_TIMEZONE}}}",
     }
-    for key, _ in DEFAULT_OPENCLAW_ENV_DEFAULTS:
-        environment[key] = f"${{{key}:-}}"
-    return environment
 
 
 def _all_bots_cli_service_name(slug: str) -> str:

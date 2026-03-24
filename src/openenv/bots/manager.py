@@ -6,7 +6,7 @@ from collections.abc import Iterable
 import shutil
 from getpass import getpass
 from dataclasses import dataclass, field
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from openenv.core.skills import (
     MANDATORY_SKILL_SOURCES,
@@ -26,16 +26,20 @@ from openenv.core.models import (
     SkillConfig,
 )
 from openenv.core.utils import slugify_name
+from openenv.core.utils import stable_json_dumps
 from openenv.docker.builder import default_image_tag
 from openenv.docker.compose import (
     AllBotsComposeSpec,
     all_bots_compose_filename,
+    all_bots_env_filename,
     default_compose_filename,
     default_env_filename,
     gateway_container_name,
     materialize_runtime_mount_tree,
+    prepare_runtime_env_values,
     render_compose,
     render_all_bots_compose,
+    render_all_bots_env_file,
     render_env_file,
     write_compose,
     write_env_file,
@@ -719,12 +723,133 @@ def generate_all_bots_stack(root: str | Path) -> AllBotsStackArtifacts:
         )
         for artifact in bot_artifacts
     ]
+    _materialize_all_bots_runtime(root, bot_artifacts)
+    shared_env_path = bots_root(root) / all_bots_env_filename()
+    shared_env_values = prepare_runtime_env_values(load_secret_values(shared_env_path))
+    write_env_file(shared_env_path, render_all_bots_env_file(existing_values=shared_env_values))
     stack_path = all_bots_compose_path(root)
     write_compose(stack_path, render_all_bots_compose(specs))
     return AllBotsStackArtifacts(
         stack_path=stack_path,
         bot_artifacts=bot_artifacts,
     )
+
+
+def _materialize_all_bots_runtime(
+    root: str | Path,
+    bot_artifacts: list[GeneratedArtifacts],
+) -> None:
+    """Write the shared state/workspace tree consumed by the all-bots gateway."""
+    shared_root = bots_root(root) / ".all-bots"
+    shared_state_root = shared_root / ".openclaw"
+    shared_workspace_root = shared_root / "workspace"
+    if shared_root.exists():
+        shutil.rmtree(shared_root, ignore_errors=True)
+    shared_state_root.mkdir(parents=True, exist_ok=True)
+    shared_workspace_root.mkdir(parents=True, exist_ok=True)
+
+    shared_state_dir = "/opt/openclaw"
+    shared_workspace_prefix = PurePosixPath(shared_state_dir) / "workspace"
+    shared_agent_entries: list[dict[str, object]] = []
+    seen_agent_ids: set[str] = set()
+
+    for artifact in bot_artifacts:
+        manifest, _ = load_manifest(artifact.bot.manifest_path)
+        if manifest.openclaw.agent_id in seen_agent_ids:
+            raise OpenEnvError(
+                "Shared gateway generation requires unique openclaw.agent_id values; "
+                f"duplicate detected: {manifest.openclaw.agent_id}"
+            )
+        seen_agent_ids.add(manifest.openclaw.agent_id)
+
+        shared_workspace = str(shared_workspace_prefix / artifact.bot.slug)
+        _write_shared_bot_workspace(
+            manifest,
+            shared_state_root=shared_state_root,
+            shared_workspace_root=shared_workspace_root / artifact.bot.slug,
+            shared_state_dir=shared_state_dir,
+            shared_workspace=shared_workspace,
+        )
+        shared_agent_entries.append(
+            manifest.openclaw.agent_definition(
+                artifact.image_tag,
+                workspace=shared_workspace,
+                state_dir=shared_state_dir,
+            )
+        )
+
+    shared_config = {
+        "gateway": {
+            "mode": "local",
+            "bind": "lan",
+            "auth": {
+                "mode": "token",
+                "token": "${OPENCLAW_GATEWAY_TOKEN}",
+            },
+        },
+        "agents": {
+            "defaults": {
+                "workspace": str(shared_workspace_prefix),
+            },
+            "list": shared_agent_entries,
+        },
+    }
+    (shared_state_root / "openclaw.json").write_text(
+        stable_json_dumps(shared_config, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _write_shared_bot_workspace(
+    manifest: Manifest,
+    *,
+    shared_state_root: Path,
+    shared_workspace_root: Path,
+    shared_state_dir: str,
+    shared_workspace: str,
+) -> None:
+    """Write one bot's runtime workspace into the shared all-bots tree."""
+    files = manifest.workspace_files(workspace=shared_workspace, state_dir=shared_state_dir)
+    state_dir = PurePosixPath(shared_state_dir)
+    workspace_dir = PurePosixPath(shared_workspace)
+    shared_workspace_root.mkdir(parents=True, exist_ok=True)
+    _map_shared_host_path(
+        manifest.openclaw.agent_dir(state_dir=shared_state_dir),
+        state_dir=state_dir,
+        workspace_dir=workspace_dir,
+        shared_state_root=shared_state_root,
+        shared_workspace_root=shared_workspace_root,
+    ).mkdir(parents=True, exist_ok=True)
+    for container_path, content in sorted(files.items()):
+        host_path = _map_shared_host_path(
+            container_path,
+            state_dir=state_dir,
+            workspace_dir=workspace_dir,
+            shared_state_root=shared_state_root,
+            shared_workspace_root=shared_workspace_root,
+        )
+        host_path.parent.mkdir(parents=True, exist_ok=True)
+        host_path.write_text(content, encoding="utf-8")
+
+
+def _map_shared_host_path(
+    container_path: str,
+    *,
+    state_dir: PurePosixPath,
+    workspace_dir: PurePosixPath,
+    shared_state_root: Path,
+    shared_workspace_root: Path,
+) -> Path:
+    """Map one container path into the shared all-bots host tree."""
+    container = PurePosixPath(container_path)
+    try:
+        relative = container.relative_to(workspace_dir)
+    except ValueError:
+        relative = container.relative_to(state_dir)
+        root = shared_state_root
+    else:
+        root = shared_workspace_root
+    return root.joinpath(*relative.parts) if relative.parts else root
 
 
 def improve_bot_markdown_documents(

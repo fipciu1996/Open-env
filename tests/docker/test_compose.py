@@ -15,6 +15,7 @@ from openenv.docker.compose import (
     DEFAULT_OPENCLAW_TMPFS,
     OPENCLAW_CLI_ENTRYPOINT,
     all_bots_compose_filename,
+    all_bots_env_filename,
     cli_container_name,
     default_compose_filename,
     default_env_filename,
@@ -109,6 +110,7 @@ class ComposeTests(unittest.TestCase):
 
     def test_all_bots_compose_filename_is_stable(self) -> None:
         self.assertEqual(all_bots_compose_filename(), "all-bots-compose.yml")
+        self.assertEqual(all_bots_env_filename(), ".all-bots.env")
 
     def test_container_names_use_openclaw_suffixes(self) -> None:
         self.assertEqual(
@@ -179,12 +181,14 @@ class ComposeTests(unittest.TestCase):
 
         self.assertIn('container_name: "all-bots-openclaw-gateway"', compose_text)
         self.assertEqual(compose_text.count("openclaw-gateway:"), 1)
+        self.assertIn('      - "./.all-bots.env"', compose_text)
         self.assertIn("  bot-operations-agent:", compose_text)
         self.assertIn("  bot-analytics-agent:", compose_text)
         self.assertIn('      context: "./operations-agent"', compose_text)
         self.assertIn('      context: "./analytics-agent"', compose_text)
         self.assertIn('      - "./operations-agent/.operations-agent.env"', compose_text)
         self.assertIn('      - "./analytics-agent/.analytics-agent.env"', compose_text)
+        self.assertEqual(compose_text.count('      - "./.all-bots.env"'), 3)
         self.assertIn('    image: "${OPENCLAW_GATEWAY_IMAGE:-ghcr.io/openclaw/openclaw:latest}"', compose_text)
         self.assertIn('      OPENCLAW_STATE_DIR: "/opt/openclaw"', compose_text)
         self.assertIn('      OPENCLAW_CONFIG_PATH: "/opt/openclaw/openclaw.json"', compose_text)
