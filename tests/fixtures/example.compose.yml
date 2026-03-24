@@ -105,6 +105,6 @@ services:
     stdin_open: true
     tty: true
     init: true
-    entrypoint: ["node", "dist/index.js"]
+    entrypoint: ["tail", "-f", "/dev/null"]
     depends_on:
       - openclaw-gateway

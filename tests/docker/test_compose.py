@@ -13,7 +13,7 @@ from openenv.docker.compose import (
     DEFAULT_OPENCLAW_NPROC,
     DEFAULT_OPENCLAW_PIDS_LIMIT,
     DEFAULT_OPENCLAW_TMPFS,
-    OPENCLAW_CLI_ENTRYPOINT,
+    OPENCLAW_HELPER_ENTRYPOINT,
     all_bots_compose_filename,
     all_bots_env_filename,
     cli_container_name,
@@ -59,7 +59,7 @@ class ComposeTests(unittest.TestCase):
         self.assertIn("    cap_drop:", compose_text)
         self.assertIn("      - ALL", compose_text)
         expected_entrypoint = (
-            '    entrypoint: [' + ", ".join(f'"{part}"' for part in OPENCLAW_CLI_ENTRYPOINT) + "]"
+            '    entrypoint: [' + ", ".join(f'"{part}"' for part in OPENCLAW_HELPER_ENTRYPOINT) + "]"
         )
         self.assertIn(
             expected_entrypoint,
@@ -190,10 +190,9 @@ class ComposeTests(unittest.TestCase):
         self.assertIn('      - "./analytics-agent/.analytics-agent.env"', compose_text)
         self.assertEqual(compose_text.count('      - "./.all-bots.env"'), 3)
         self.assertIn('    image: "${OPENCLAW_GATEWAY_IMAGE:-ghcr.io/openclaw/openclaw:latest}"', compose_text)
-        self.assertIn('      OPENCLAW_STATE_DIR: "/opt/openclaw"', compose_text)
-        self.assertIn('      OPENCLAW_CONFIG_PATH: "/opt/openclaw/openclaw.json"', compose_text)
-        self.assertIn('      - "./.all-bots/.openclaw:/opt/openclaw"', compose_text)
-        self.assertIn('      - "./.all-bots/workspace:/opt/openclaw/workspace"', compose_text)
+        self.assertIn('      OPENCLAW_STATE_DIR: "/opt/openclaw/.openclaw"', compose_text)
+        self.assertIn('      OPENCLAW_CONFIG_PATH: "/opt/openclaw/.openclaw/openclaw.json"', compose_text)
+        self.assertIn('      - "./.all-bots:/opt/openclaw"', compose_text)
         self.assertIn('      - ALL', compose_text)
         self.assertIn('    read_only: true', compose_text)
 

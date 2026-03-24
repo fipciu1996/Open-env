@@ -18,7 +18,7 @@ from openenv.docker.dockerfile import render_runtime_payload
 
 OPENCLAW_GATEWAY_SERVICE = "openclaw-gateway"
 OPENCLAW_CLI_SERVICE = "openclaw-cli"
-OPENCLAW_CLI_ENTRYPOINT = ("node", "dist/index.js")
+OPENCLAW_HELPER_ENTRYPOINT = ("tail", "-f", "/dev/null")
 DEFAULT_OPENCLAW_HOME = "/home/node"
 DEFAULT_OPENCLAW_CONFIG_DIR = "./.openclaw"
 DEFAULT_OPENCLAW_WORKSPACE_DIR = "./workspace"
@@ -41,9 +41,11 @@ ALL_BOTS_GATEWAY_SERVICE = "openclaw-gateway"
 ALL_BOTS_GATEWAY_CONTAINER = "all-bots-openclaw-gateway"
 ALL_BOTS_COMPOSE_FILENAME = "all-bots-compose.yml"
 ALL_BOTS_ENV_FILENAME = ".all-bots.env"
+ALL_BOTS_GATEWAY_ROOT_DIR = "./.all-bots"
 ALL_BOTS_GATEWAY_CONFIG_DIR = "./.all-bots/.openclaw"
 ALL_BOTS_GATEWAY_WORKSPACE_DIR = "./.all-bots/workspace"
-ALL_BOTS_GATEWAY_STATE_DIR = "/opt/openclaw"
+ALL_BOTS_GATEWAY_CONTAINER_ROOT = "/opt/openclaw"
+ALL_BOTS_GATEWAY_STATE_DIR = f"{ALL_BOTS_GATEWAY_CONTAINER_ROOT}/.openclaw"
 ALL_BOTS_GATEWAY_CONFIG_PATH = f"{ALL_BOTS_GATEWAY_STATE_DIR}/openclaw.json"
 DEFAULT_OPENCLAW_ENV_DEFAULTS: tuple[tuple[str, str], ...] = (
     ("OPENCLAW_GATEWAY_TOKEN", ""),
@@ -218,7 +220,7 @@ def render_compose(manifest: Manifest, image_tag: str) -> str:
             "    stdin_open: true",
             "    tty: true",
             "    init: true",
-            f"    entrypoint: [{', '.join(_quoted(part) for part in OPENCLAW_CLI_ENTRYPOINT)}]",
+            f"    entrypoint: [{', '.join(_quoted(part) for part in OPENCLAW_HELPER_ENTRYPOINT)}]",
             "    depends_on:",
             f"      - {OPENCLAW_GATEWAY_SERVICE}",
         ]
@@ -231,6 +233,7 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
     if not specs:
         raise ValueError("At least one bot is required to render the shared compose stack.")
     shared_env_file = f"./{all_bots_env_filename()}"
+    shared_runtime_mount = f"{ALL_BOTS_GATEWAY_ROOT_DIR}:{ALL_BOTS_GATEWAY_CONTAINER_ROOT}"
     lines = [
         "services:",
         f"  {ALL_BOTS_GATEWAY_SERVICE}:",
@@ -257,14 +260,7 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
             f'        hard: "${{OPENCLAW_NOFILE_HARD:-{DEFAULT_OPENCLAW_NOFILE_HARD}}}"',
             f'      nproc: "${{OPENCLAW_NPROC:-{DEFAULT_OPENCLAW_NPROC}}}"',
             "    volumes:",
-            (
-                f'      - "{ALL_BOTS_GATEWAY_CONFIG_DIR}:'
-                f'{ALL_BOTS_GATEWAY_STATE_DIR}"'
-            ),
-            (
-                f'      - "{ALL_BOTS_GATEWAY_WORKSPACE_DIR}:'
-                f'{ALL_BOTS_GATEWAY_STATE_DIR}/workspace"'
-            ),
+            f"      - {_quoted(shared_runtime_mount)}",
             "    ports:",
             (
                 f'      - "${{OPENCLAW_GATEWAY_HOST_BIND:-{DEFAULT_OPENCLAW_GATEWAY_HOST_BIND}}}'
@@ -304,10 +300,6 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
         service_name = _all_bots_cli_service_name(spec.slug)
         container_name = _all_bots_cli_container_name(spec.slug)
         env_file = f"./{spec.slug}/{default_env_filename(spec.manifest.openclaw.agent_name)}"
-        config_mount = f"{ALL_BOTS_GATEWAY_CONFIG_DIR}:{ALL_BOTS_GATEWAY_STATE_DIR}"
-        workspace_mount = (
-            f"{ALL_BOTS_GATEWAY_WORKSPACE_DIR}:{ALL_BOTS_GATEWAY_STATE_DIR}/workspace"
-        )
         cli_env = dict(_base_service_environment(spec.manifest))
         cli_env["OPENCLAW_CONFIG_PATH"] = ALL_BOTS_GATEWAY_CONFIG_PATH
         cli_env["OPENCLAW_STATE_DIR"] = ALL_BOTS_GATEWAY_STATE_DIR
@@ -348,12 +340,11 @@ def render_all_bots_compose(specs: Sequence[AllBotsComposeSpec]) -> str:
         lines.extend(
             [
                 "    volumes:",
-                f"      - {_quoted(config_mount)}",
-                f"      - {_quoted(workspace_mount)}",
+                f"      - {_quoted(shared_runtime_mount)}",
                 "    stdin_open: true",
                 "    tty: true",
                 "    init: true",
-                f"    entrypoint: [{', '.join(_quoted(part) for part in OPENCLAW_CLI_ENTRYPOINT)}]",
+                f"    entrypoint: [{', '.join(_quoted(part) for part in OPENCLAW_HELPER_ENTRYPOINT)}]",
                 "    depends_on:",
                 f"      - {ALL_BOTS_GATEWAY_SERVICE}",
             ]

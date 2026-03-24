@@ -29,6 +29,8 @@ from openenv.core.utils import slugify_name
 from openenv.core.utils import stable_json_dumps
 from openenv.docker.builder import default_image_tag
 from openenv.docker.compose import (
+    ALL_BOTS_GATEWAY_CONTAINER_ROOT,
+    ALL_BOTS_GATEWAY_STATE_DIR,
     AllBotsComposeSpec,
     all_bots_compose_filename,
     all_bots_env_filename,
@@ -748,8 +750,8 @@ def _materialize_all_bots_runtime(
     shared_state_root.mkdir(parents=True, exist_ok=True)
     shared_workspace_root.mkdir(parents=True, exist_ok=True)
 
-    shared_state_dir = "/opt/openclaw"
-    shared_workspace_prefix = PurePosixPath(shared_state_dir) / "workspace"
+    shared_state_dir = ALL_BOTS_GATEWAY_STATE_DIR
+    shared_workspace_prefix = PurePosixPath(ALL_BOTS_GATEWAY_CONTAINER_ROOT) / "workspace"
     shared_agent_entries: list[dict[str, object]] = []
     seen_agent_ids: set[str] = set()
 
